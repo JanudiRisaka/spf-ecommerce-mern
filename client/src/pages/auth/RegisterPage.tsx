@@ -1,3 +1,4 @@
+// client/src/pages/auth/RegisterPage.tsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/store/authStore';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -14,7 +16,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const { register } = useAuthStore();
   const navigate = useNavigate();
 
@@ -38,9 +40,11 @@ export default function RegisterPage() {
 
     try {
       await register(email, password, name);
+      toast.success("Account created successfully!"); // Use toast for success
       navigate('/'); // Redirect to home page after successful registration
-    } catch (err) {
-      setError('Registration failed. Please try again.');
+    } catch (err: any) { // <-- Change to `any` to access err.message
+      // Set the error state with the message from the API
+      setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -116,9 +120,9 @@ export default function RegisterPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button 
-              type="submit" 
-              className="w-full" 
+            <Button
+              type="submit"
+              className="w-full"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -132,8 +136,8 @@ export default function RegisterPage() {
             </Button>
             <p className="text-sm text-center text-gray-600">
               Already have an account?{' '}
-              <Link 
-                to="/auth/login" 
+              <Link
+                to="/auth/login"
                 className="text-primary hover:text-primary/80 font-medium"
               >
                 Sign in here

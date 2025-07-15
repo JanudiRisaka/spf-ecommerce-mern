@@ -6,13 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/store/authStore';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const { login } = useAuthStore();
   const navigate = useNavigate();
 
@@ -23,9 +24,12 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
+      toast.success("Login successful! Welcome back.");
       navigate('/'); // Redirect to home page after successful login
-    } catch (err) {
-      setError('Invalid email or password. Please try again.');
+    } catch (err: any) { // <-- CHANGE: Type 'err' as 'any' to access its properties
+      // --- THIS IS THE KEY CHANGE ---
+      // Display the specific error message from the API or a generic one
+      setError(err.message || 'Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -75,10 +79,10 @@ export default function LoginPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading|| !email || !password}
             >
               {isLoading ? (
                 <>
@@ -91,8 +95,8 @@ export default function LoginPage() {
             </Button>
             <p className="text-sm text-center text-gray-600">
               Don't have an account?{' '}
-              <Link 
-                to="/auth/register" 
+              <Link
+                to="/auth/register"
                 className="text-primary hover:text-primary/80 font-medium"
               >
                 Create one here

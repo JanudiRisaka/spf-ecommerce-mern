@@ -1,32 +1,69 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import ProductCard from '@/components/public/ProductCard';
-import { mockProducts, mockCategories } from '@/lib/mockData';
+import { IProduct } from '@/types';
+import { getProducts } from '@/api/productApi';
 import { Filter } from 'lucide-react';
+import { LoadingPage } from '@/components/shared/LoadingPage';
+
 
 export default function ProductsPage() {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<number[]>([0, 300]);
+  // --- STATE MANAGEMENT FOR REAL DATA ---
+  const [allProducts, setAllProducts] = useState<IProduct[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // <-- 2. ADD loading state
 
-  // Get min and max prices from products
-  const minPrice = Math.min(...mockProducts.map(p => p.price));
-  const maxPrice = Math.max(...mockProducts.map(p => p.price));
+  // --- FILTER STATE (No change needed) ---
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<number[]>([0, 1000]); // Start with a default range
+
+  // --- API DATA FETCHING ---
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      try {
+        const productsFromApi = await getProducts();
+        setAllProducts(productsFromApi);
+
+        // Dynamically set price range from fetched data
+        if (productsFromApi.length > 0) {
+          const prices = productsFromApi.map(p => p.price);
+          const min = Math.floor(Math.min(...prices));
+          const max = Math.ceil(Math.max(...prices));
+          setPriceRange([min, max]);
+        }
+      } catch (error) {
+        console.error("Failed to load products on page", error);
+        // Optionally set an error state here
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []); // Empty array ensures this runs only once on mount
+
+  // --- DERIVE DATA FROM STATE DYNAMICALLY ---
+  const minPrice = useMemo(() => allProducts.length > 0 ? Math.floor(Math.min(...allProducts.map(p => p.price))) : 0, [allProducts]);
+  const maxPrice = useMemo(() => allProducts.length > 0 ? Math.ceil(Math.max(...allProducts.map(p => p.price))) : 1000, [allProducts]);
+  const availableCategories = useMemo(() => [...new Set(allProducts.map(p => p.category))], [allProducts]);
 
   // Filter products based on selected criteria
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter(product => {
-      const categoryMatch = selectedCategories.length === 0 || 
+    // <-- 3. CHANGE: Filter 'allProducts' instead of 'mockProducts'
+    return allProducts.filter(product => {
+      const categoryMatch = selectedCategories.length === 0 ||
         selectedCategories.includes(product.category);
       const priceMatch = product.price >= priceRange[0] && product.price <= priceRange[1];
-      
+
       return categoryMatch && priceMatch;
     });
-  }, [selectedCategories, priceRange]);
+  }, [selectedCategories, priceRange, allProducts]); // <-- 4. ADD 'allProducts' to dependency array
 
+  // --- Helper function (No change needed) ---
   const handleCategoryChange = (category: string, checked: boolean) => {
     if (checked) {
       setSelectedCategories(prev => [...prev, category]);
@@ -34,6 +71,11 @@ export default function ProductsPage() {
       setSelectedCategories(prev => prev.filter(c => c !== category));
     }
   };
+
+  // --- RENDER LOGIC ---
+  if (isLoading) {
+    return <LoadingPage />; // <-- 5. ADD loading state check
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -59,17 +101,17 @@ export default function ProductsPage() {
               <div>
                 <Label className="text-base font-semibold mb-3 block">Category</Label>
                 <div className="space-y-3">
-                  {mockCategories.map((category) => (
+                  {availableCategories.map((category) => (
                     <div key={category} className="flex items-center space-x-2">
                       <Checkbox
                         id={category}
                         checked={selectedCategories.includes(category)}
-                        onCheckedChange={(checked) => 
+                        onCheckedChange={(checked) =>
                           handleCategoryChange(category, checked as boolean)
                         }
                       />
-                      <Label 
-                        htmlFor={category} 
+                      <Label
+                        htmlFor={category}
                         className="text-sm font-normal cursor-pointer"
                       >
                         {category}
@@ -144,7 +186,7 @@ export default function ProductsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product._id} product={product} />
               ))}
             </div>
           )}

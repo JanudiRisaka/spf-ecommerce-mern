@@ -1,247 +1,120 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useAuthStore } from '@/store/authStore';
+import { getOrders, updateOrderStatus } from '@/api/orderApi';
+import { IOrder } from '@/types';
 
-// Mock orders data
-const mockOrders = [
-  {
-    id: 'ORD-001',
-    customerName: 'Rajesh Kumar',
-    customerEmail: 'rajesh@example.com',
-    date: '2024-01-15',
-    total: 89.99,
-    status: 'completed'
-  },
-  {
-    id: 'ORD-002',
-    customerName: 'Priya Sharma',
-    customerEmail: 'priya@example.com',
-    date: '2024-01-14',
-    total: 125.50,
-    status: 'processing'
-  },
-  {
-    id: 'ORD-003',
-    customerName: 'Arjun Patel',
-    customerEmail: 'arjun@example.com',
-    date: '2024-01-13',
-    total: 65.99,
-    status: 'pending'
-  },
-  {
-    id: 'ORD-004',
-    customerName: 'Meera Singh',
-    customerEmail: 'meera@example.com',
-    date: '2024-01-12',
-    total: 199.99,
-    status: 'completed'
-  },
-  {
-    id: 'ORD-005',
-    customerName: 'Vikram Reddy',
-    customerEmail: 'vikram@example.com',
-    date: '2024-01-11',
-    total: 75.25,
-    status: 'cancelled'
-  },
-  {
-    id: 'ORD-006',
-    customerName: 'Anita Desai',
-    customerEmail: 'anita@example.com',
-    date: '2024-01-10',
-    total: 150.00,
-    status: 'processing'
-  },
-  {
-    id: 'ORD-007',
-    customerName: 'Suresh Gupta',
-    customerEmail: 'suresh@example.com',
-    date: '2024-01-09',
-    total: 95.75,
-    status: 'completed'
-  },
-  {
-    id: 'ORD-008',
-    customerName: 'Kavya Nair',
-    customerEmail: 'kavya@example.com',
-    date: '2024-01-08',
-    total: 180.50,
-    status: 'pending'
-  }
-];
+import { LoadingPage } from '@/components/shared/LoadingPage';
+//import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 export default function AdminOrdersPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [orders, setOrders] = useState<IOrder[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const { token } = useAuthStore.getState();
 
-  // Filter orders based on search term
-  const filteredOrders = mockOrders.filter(order =>
-    order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedOrders = filteredOrders.slice(startIndex, startIndex + itemsPerPage);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Completed</Badge>;
-      case 'processing':
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Processing</Badge>;
-      case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Pending</Badge>;
-      case 'cancelled':
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Cancelled</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
+  const fetchOrders = async () => {
+    if (!token) return;
+    setIsLoading(true);
+    try {
+      const data = await getOrders(token);
+      setOrders(data);
+    } catch (error) {
+      toast.error("Failed to load orders.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const handleStatusUpdate = async (orderId: string, newStatus: IOrder['orderStatus']) => {
+    if (!token) return;
+    try {
+      await updateOrderStatus(orderId, newStatus, token);
+      toast.success("Order status updated!");
+      // Optimistically update the UI or refetch
+      setOrders(prev => prev.map(order => order._id === orderId ? { ...order, orderStatus: newStatus } : order));
+    } catch (error) {
+      toast.error("Failed to update status.");
+    }
   };
 
+  const filteredOrders = statusFilter === 'all'
+    ? orders
+    : orders.filter(order => order.orderStatus === statusFilter);
+
+  const getStatusBadge = (status: IOrder['orderStatus']) => {
+    switch (status) {
+      case 'processing': return <Badge className="bg-blue-100 text-blue-800">Processing</Badge>;
+      case 'shipped': return <Badge className="bg-yellow-100 text-yellow-800">Shipped</Badge>;
+      case 'delivered': return <Badge className="bg-green-100 text-green-800">Delivered</Badge>;
+      default: return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  if (isLoading) return <LoadingPage />;
+
   return (
-    <div className="space-y-8">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">
-          Order Management
-        </h1>
-        <p className="text-lg text-gray-600">
-          Track and manage customer orders
-        </p>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
+          <p className="text-gray-600">Manage customer orders and deliveries</p>
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-48"><SelectValue placeholder="Filter by status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Orders</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="processing">Processing</SelectItem>
+            <SelectItem value="shipped">Shipped</SelectItem>
+            <SelectItem value="delivered">Delivered</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-
-      {/* Filters and Search */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Order Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search orders by ID, customer name, or email..."
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="pl-10"
-              />
-            </div>
-            <div className="text-sm text-gray-600">
-              {filteredOrders.length} order{filteredOrders.length !== 1 ? 's' : ''} found
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Orders Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">All Orders</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>All Orders ({filteredOrders.length})</CardTitle></CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="font-semibold">Order ID</TableHead>
-                <TableHead className="font-semibold">Customer</TableHead>
-                <TableHead className="font-semibold">Date</TableHead>
-                <TableHead className="font-semibold">Total</TableHead>
-                <TableHead className="font-semibold">Status</TableHead>
-                <TableHead className="font-semibold text-right">Actions</TableHead>
+                <TableHead>Order ID</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Total</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedOrders.map((order) => (
-                <TableRow key={order.id} className="hover:bg-gray-50">
-                  <TableCell className="font-medium text-primary">
-                    {order.id}
-                  </TableCell>
+              {filteredOrders.map((order) => (
+                <TableRow key={order._id}>
+                  <TableCell className="font-mono text-xs">{order._id}</TableCell>
+                  <TableCell>{order.user.name}</TableCell>
+                  <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>LKR {order.totalPrice.toFixed(2)}</TableCell>
                   <TableCell>
-                    <div>
-                      <div className="font-medium">{order.customerName}</div>
-                      <div className="text-sm text-gray-600">{order.customerEmail}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{formatDate(order.date)}</TableCell>
-                  <TableCell className="font-semibold text-primary">
-                    ${order.total.toFixed(2)}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(order.status)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="outline" size="sm">
-                      <Eye className="h-4 w-4 mr-1" />
-                      View Details
-                    </Button>
+                    <Select defaultValue={order.orderStatus} onValueChange={(value) => handleStatusUpdate(order._id, value as IOrder['orderStatus'])}>
+                      <SelectTrigger className="w-[120px] p-0 border-none focus:ring-0 bg-transparent h-auto">
+                        <SelectValue asChild>{getStatusBadge(order.orderStatus)}</SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="processing">Processing</SelectItem>
+                        <SelectItem value="shipped">Shipped</SelectItem>
+                        <SelectItem value="delivered">Delivered</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6">
-              <div className="text-sm text-gray-600">
-                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredOrders.length)} of {filteredOrders.length} orders
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous
-                </Button>
-                
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handlePageChange(page)}
-                    className="w-10"
-                  >
-                    {page}
-                  </Button>
-                ))}
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

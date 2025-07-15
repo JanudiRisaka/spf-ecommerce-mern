@@ -1,10 +1,20 @@
 import express from 'express';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+import connectDB from './config/db';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
-import connectDB from './config/db';
+
+
+// Import routes
 import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
 import productRoutes from './routes/productRoutes';
+import orderRoutes from './routes/orderRoutes';
+import inquiryRoutes from './routes/inquiryRoutes';
+import uploadRoutes from './routes/uploadRoutes';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -19,14 +29,24 @@ const PORT = process.env.PORT || 3001;
 app.use(helmet());
 
 // Enable CORS for all origins (you might want to restrict this in production)
-app.use(cors());
+
+const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+
+app.use(cors({
+  origin: clientUrl,  // Allow only your client to make requests
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}));
 
 // Parse JSON request bodies
 app.use(express.json());
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/orders', orderRoutes);
+app.use('/api/v1/inquiries', inquiryRoutes);
+app.use('/api/v1/upload', uploadRoutes);
 
 // Simple GET route
 app.get('/api/v1', (req, res) => {

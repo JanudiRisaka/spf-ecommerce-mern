@@ -54,6 +54,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
         name: savedUser.name,
         email: savedUser.email,
         role: savedUser.role,
+        createdAt: savedUser.createdAt,
       },
     });
   } catch (error: any) {
@@ -116,6 +117,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         name: user.name,
         email: user.email,
         role: user.role,
+        createdAt: user.createdAt,
       },
       token,
     });

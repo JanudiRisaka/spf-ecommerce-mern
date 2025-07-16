@@ -9,7 +9,7 @@ import Order, { IOrder } from '../models/Order'; // Import the IOrder interface
 export const getOrders = async (req: Request, res: Response): Promise<void> => {
   try {
     const orders = await Order.find({}).populate('user', 'name email').sort({ createdAt: -1 });
-    res.status(200).json({ success: true, orders: orders });
+    res.status(200).json({ success: true, count: orders.length, data: orders });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server Error' });
@@ -42,7 +42,7 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
       }
 
       const updatedOrder = await order.save();
-      res.status(200).json({ success: true, order: updatedOrder });
+      res.status(200).json({ success: true, data: updatedOrder });
     } else {
       res.status(404).json({ success: false, message: 'Order not found' });
     }
@@ -93,7 +93,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 
     const createdOrder = await order.save();
 
-    res.status(201).json({ success: true, order: createdOrder });
+    res.status(201).json({ success: true, data: createdOrder });
   } catch (error) {
     console.error("CREATE ORDER FAILED:", error);
     res.status(500).json({ success: false, message: 'Server Error' });

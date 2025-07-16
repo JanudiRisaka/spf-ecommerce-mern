@@ -9,7 +9,7 @@ export const getOrders = async (token: string): Promise<IOrder[]> => {
       headers: { Authorization: `Bearer ${token}` },
     });
     // Expects backend to return { orders: [...] }
-    return response.data.orders || [];
+    return response.data.data || [];
   } catch (error) {
     console.error("Failed to fetch orders:", error);
     throw error;
@@ -23,7 +23,7 @@ export const updateOrderStatus = async (orderId: string, status: string, token: 
     });
     // --- THIS IS THE CHANGE ---
     // Now expects backend to return { order: {...} } for consistency
-    return response.data.order;
+    return response.data.data;
   } catch (error) {
     console.error("Failed to update order status:", error);
     throw error;
@@ -39,7 +39,7 @@ export const createOrder = async (orderData: any, token: string): Promise<IOrder
       },
     });
     // Expects backend to return { order: {...} }
-    return response.data.order;
+    return response.data.data;
   } catch (error) {
     console.error("Failed to create order:", error);
     throw error;

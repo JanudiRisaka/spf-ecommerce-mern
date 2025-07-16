@@ -1,10 +1,10 @@
+// ----------------- START OF CORRECTED AdminOrdersPage.tsx -----------------
+
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { getOrders, updateOrderStatus } from '@/api/orderApi';
 import { IOrder } from '@/types';
-
 import { LoadingPage } from '@/components/shared/LoadingPage';
-//import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -21,8 +21,8 @@ export default function AdminOrdersPage() {
     if (!token) return;
     setIsLoading(true);
     try {
-      const data = await getOrders(token);
-      setOrders(data);
+      const ordersFromApi = await getOrders(token);
+    setOrders(ordersFromApi || []);
     } catch (error) {
       toast.error("Failed to load orders.");
     } finally {
@@ -39,7 +39,6 @@ export default function AdminOrdersPage() {
     try {
       await updateOrderStatus(orderId, newStatus, token);
       toast.success("Order status updated!");
-      // Optimistically update the UI or refetch
       setOrders(prev => prev.map(order => order._id === orderId ? { ...order, orderStatus: newStatus } : order));
     } catch (error) {
       toast.error("Failed to update status.");
@@ -55,6 +54,7 @@ export default function AdminOrdersPage() {
       case 'processing': return <Badge className="bg-blue-100 text-blue-800">Processing</Badge>;
       case 'shipped': return <Badge className="bg-yellow-100 text-yellow-800">Shipped</Badge>;
       case 'delivered': return <Badge className="bg-green-100 text-green-800">Delivered</Badge>;
+      case 'cancelled': return <Badge variant="destructive">Cancelled</Badge>;
       default: return <Badge variant="secondary">{status}</Badge>;
     }
   };
@@ -76,6 +76,7 @@ export default function AdminOrdersPage() {
             <SelectItem value="processing">Processing</SelectItem>
             <SelectItem value="shipped">Shipped</SelectItem>
             <SelectItem value="delivered">Delivered</SelectItem>
+            <SelectItem value="cancelled">Cancelled</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -100,16 +101,18 @@ export default function AdminOrdersPage() {
                   <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>LKR {order.totalPrice.toFixed(2)}</TableCell>
                   <TableCell>
+                    {/* --- THIS IS THE FIX --- */}
                     <Select defaultValue={order.orderStatus} onValueChange={(value) => handleStatusUpdate(order._id, value as IOrder['orderStatus'])}>
                       <SelectTrigger className="w-[120px] p-0 border-none focus:ring-0 bg-transparent h-auto">
-                        <SelectValue asChild>  {/* <-- ADD THIS PROP HERE AS WELL */}
-                          {getStatusBadge(order.orderStatus)}
-                        </SelectValue>
+                        {/* Render the badge directly inside the trigger */}
+                        {getStatusBadge(order.orderStatus)}
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="processing">Processing</SelectItem>
                         <SelectItem value="shipped">Shipped</SelectItem>
                         <SelectItem value="delivered">Delivered</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
@@ -122,3 +125,5 @@ export default function AdminOrdersPage() {
     </div>
   );
 }
+
+// ----------------- END OF CORRECTED AdminOrdersPage.tsx -----------------

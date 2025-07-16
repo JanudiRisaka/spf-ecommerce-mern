@@ -5,14 +5,13 @@ import { adminRoutes } from './AdminRoutes';
 import { publicRoutes } from './PublicRoutes';
 import { authRoutes } from './AuthRoutes';
 
+// A component that uses the hook to render the combined routes
 const AppRoutes = () => {
-  // The useRoutes hook takes an array of route objects and renders the appropriate one
   const routes = useRoutes([
-    ...publicRoutes,
+    ...publicRoutes,   // <-- Use it directly, without spreading
     ...authRoutes,
     ...adminRoutes,
-    // Add 404 Not Found route at the end
-    { path: '*', element: <h1>404 - Page Not Found</h1> },
+    { path: '*', element: <div className="p-8 text-center"><h1>404 - Page Not Found</h1></div> },
   ]);
 
   return routes;

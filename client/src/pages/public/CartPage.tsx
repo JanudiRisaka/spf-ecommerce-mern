@@ -80,8 +80,8 @@ export default function CartPage() {
         {/* Cart Items */}
         <div className="lg:col-span-2">
           <div className="space-y-4">
-            {items.map((item) => (
-              <CartItem key={item.productId} item={item} />
+           {items.map((item) => (
+              <CartItem key={item.product} item={item} />
             ))}
           </div>
 
@@ -108,7 +108,7 @@ export default function CartPage() {
                 <span>Subtotal ({totalItems} items)</span>
                 <span>${cartTotal.toFixed(2)}</span>
               </div>
-              
+
               <div className="flex justify-between">
                 <span>Shipping</span>
                 <span>
@@ -119,14 +119,14 @@ export default function CartPage() {
                   )}
                 </span>
               </div>
-              
+
               <div className="flex justify-between">
                 <span>Tax</span>
                 <span>${tax.toFixed(2)}</span>
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex justify-between text-lg font-semibold">
                 <span>Total</span>
                 <span className="text-primary">${finalTotal.toFixed(2)}</span>
@@ -138,11 +138,13 @@ export default function CartPage() {
                 </p>
               )}
             </CardContent>
-            
+
             <CardFooter className="flex flex-col space-y-3">
               <Button className="w-full" size="lg">
-                <CreditCard className="mr-2 h-4 w-4" />
-                Proceed to Checkout
+                <Link to="/shipping"> {/* <-- THIS IS THE CHANGE */}
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Proceed to Checkout
+                </Link>
               </Button>
               <p className="text-xs text-gray-500 text-center">
                 Secure checkout with SSL encryption

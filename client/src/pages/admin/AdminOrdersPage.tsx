@@ -102,7 +102,9 @@ export default function AdminOrdersPage() {
                   <TableCell>
                     <Select defaultValue={order.orderStatus} onValueChange={(value) => handleStatusUpdate(order._id, value as IOrder['orderStatus'])}>
                       <SelectTrigger className="w-[120px] p-0 border-none focus:ring-0 bg-transparent h-auto">
-                        <SelectValue asChild>{getStatusBadge(order.orderStatus)}</SelectValue>
+                        <SelectValue asChild>  {/* <-- ADD THIS PROP HERE AS WELL */}
+                          {getStatusBadge(order.orderStatus)}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="processing">Processing</SelectItem>

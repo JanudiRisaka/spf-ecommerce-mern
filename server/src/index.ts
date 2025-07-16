@@ -15,6 +15,7 @@ import productRoutes from './routes/productRoutes';
 import orderRoutes from './routes/orderRoutes';
 import inquiryRoutes from './routes/inquiryRoutes';
 import uploadRoutes from './routes/uploadRoutes';
+import paymentRoutes from './routes/paymentRoutes';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/inquiries', inquiryRoutes);
 app.use('/api/v1/upload', uploadRoutes);
+app.use('/api/v1/payment', paymentRoutes);
 
 // Simple GET route
 app.get('/api/v1', (req, res) => {

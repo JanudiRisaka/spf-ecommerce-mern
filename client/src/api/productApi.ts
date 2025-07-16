@@ -1,3 +1,4 @@
+// client/src/api/productApi.ts
 import axios from 'axios';
 import { IProduct } from '@/types';
 
@@ -31,6 +32,16 @@ export const getProducts = async (): Promise<IProduct[]> => {
     return response.data.data || [];
   } catch (error) {
     console.error("Failed to fetch products:", error);
+    return [];
+  }
+};
+
+export const getLatestProducts = async (limit = 4): Promise<IProduct[]> => {
+  try {
+    const response = await axios.get(`${API_URL}?limit=${limit}`);
+    return response.data.data || [];
+  } catch (error) {
+    console.error('Failed to fetch latest products:', error);
     return [];
   }
 };

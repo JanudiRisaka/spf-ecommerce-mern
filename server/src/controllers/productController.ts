@@ -2,22 +2,33 @@ import { Request, Response } from 'express';
 import Product from '../models/Product';
 
 /**
- * Get all products with optional category filtering
+ * Get all products with optional category and limit filtering
  * @route GET /api/v1/products
  * @access Public
  */
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { category } = req.query;
-    
-    // Build filter object
+    // --- CHANGE 1: Destructure 'limit' from the query string ---
+    const { category, limit } = req.query;
+
+    // Build filter object (no changes here)
     const filter: any = {};
     if (category && typeof category === 'string') {
-      filter.category = { $regex: category, $options: 'i' }; // Case-insensitive search
+      filter.category = { $regex: category, $options: 'i' };
     }
 
-    // Fetch products from database
-    const products = await Product.find(filter).sort({ createdAt: -1 });
+    // --- CHANGE 2: Build the query in steps ---
+    // Start building the query but don't execute it yet
+    let query = Product.find(filter).sort({ createdAt: -1 });
+
+    // If a 'limit' parameter is provided in the URL, apply it to the query
+    if (limit && !isNaN(parseInt(limit as string))) {
+      query = query.limit(parseInt(limit as string));
+    }
+    // --- END OF CHANGES ---
+
+    // Now, execute the final query
+    const products = await query;
 
     res.status(200).json({
       success: true,
@@ -60,7 +71,7 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     console.error('Get product by ID error:', error);
-    
+
     // Handle invalid ObjectId format
     if (error.name === 'CastError') {
       res.status(400).json({
@@ -186,7 +197,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     console.error('Update product error:', error);
-    
+
     // Handle invalid ObjectId format
     if (error.name === 'CastError') {
       res.status(400).json({
@@ -236,7 +247,7 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     console.error('Delete product error:', error);
-    
+
     // Handle invalid ObjectId format
     if (error.name === 'CastError') {
       res.status(400).json({

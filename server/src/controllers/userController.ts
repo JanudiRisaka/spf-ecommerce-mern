@@ -41,3 +41,71 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
+/**
+ * @desc    Get current user profile
+ * @route   GET /api/v1/users/profile
+ * @access  Private
+ */
+export const getUserProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
+    }
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    console.error('Profile error:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+/**
+ * @desc    Update current user profile
+ * @route   PUT /api/v1/users/profile
+ * @access  Private
+ */
+export const updateUserProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+        if (!req.user) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
+    }
+
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+
+    if (req.body.password) {
+      user.password = req.body.password; // hash in model middleware
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};

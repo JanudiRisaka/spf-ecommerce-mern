@@ -1,3 +1,4 @@
+
 export interface IProduct {
   _id: string;
   name: string;
@@ -15,7 +16,18 @@ export interface User {
   email: string;
   name: string;
   role: 'admin' | 'customer';
+  createdAt: string;
 }
+
+
+export interface IUserProfile extends Partial<User> {
+  phone?: string;
+  address?: string;
+  createdAt?: string;
+  city?: string;
+  country?: string;
+}
+
 
 export interface AuthState {
   isLoggedIn: boolean;
@@ -34,20 +46,23 @@ export interface CartItem {
   price: number;
 }
 
-export interface CartState {
-  items: CartItem[];
-  addToCart: (product: IProduct, qty: number) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
-  // Other cart-related properties and functions can be added here
-}
-
 export interface IShippingAddress {
   address: string;
   city: string;
   postalCode: string;
   country: string;
+}
+
+export interface CartState {
+  items: CartItem[];
+  shippingAddress?: IShippingAddress;
+  addToCart: (product: IProduct, qty: number) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  getTotalItems: () => number;
+  getCartTotal: () => number; // <-- ADD this function signature
+  saveShippingAddress: (address: IShippingAddress) => void;
 }
 
 export interface IOrder {

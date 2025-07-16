@@ -2,11 +2,18 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 
+interface AuthenticatedUser {
+  _id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'customer';
+}
+
 // Extend the Request interface to include user property
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user?: AuthenticatedUser;
     }
   }
 }
@@ -49,7 +56,12 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
     }
 
     // Attach user to request object
-    req.user = user;
+    req.user = {
+      _id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
     next();
   } catch (error: any) {
     console.error('Auth middleware error:', error);

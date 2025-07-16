@@ -134,7 +134,8 @@ export default function AdminInquiriesPage() {
                   <TableCell>
                     <Select defaultValue={inquiry.status} onValueChange={(value) => handleStatusUpdate(inquiry._id, value as IInquiry['status'])}>
                         <SelectTrigger className="w-[120px] p-0 border-none focus:ring-0 bg-transparent h-auto">
-                            <SelectValue asChild>{getStatusBadge(inquiry.status)}</SelectValue>
+                            {/* This line is causing the warning */}
+                            <SelectValue>{getStatusBadge(inquiry.status)}</SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="New">New</SelectItem>

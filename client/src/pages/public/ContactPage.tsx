@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
+import { submitInquiry } from '@/api/inquiryApi';
 
 // Form validation schema
 const contactSchema = z.object({
@@ -35,15 +36,25 @@ export default function ContactPage() {
 
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    console.log('Form submitted:', data);
-    toast.success('Thank you! Your inquiry has been submitted successfully. We\'ll get back to you within 24 hours.');
-    
-    reset();
-    setIsSubmitting(false);
+
+    try {
+      // --- THIS IS THE CHANGE ---
+      // Call the real API instead of simulating
+      await submitInquiry({
+        name: data.fullName, // Match the backend 'name' field
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
+      });
+
+      toast.success('Thank you! Your inquiry has been submitted successfully.');
+      reset(); // Clear the form on success
+    } catch (error: any) {
+      // Display the specific error from the backend
+      toast.error(error.message || 'An error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -95,7 +106,7 @@ export default function ContactPage() {
               Get in Touch
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed animate-fade-in-up animation-delay-200">
-              Have a question about our services or need a custom quote? We'd love to hear from you. 
+              Have a question about our services or need a custom quote? We'd love to hear from you.
               Our team is here to help bring your vision to life.
             </p>
           </div>
@@ -112,13 +123,13 @@ export default function ContactPage() {
                 <h2 className="text-3xl font-bold text-gray-900 mb-8">
                   Contact Information
                 </h2>
-                
+
                 <div className="space-y-6">
                   {contactInfo.map((info, index) => {
                     const IconComponent = info.icon;
                     return (
-                      <Card 
-                        key={index} 
+                      <Card
+                        key={index}
                         className="p-6 hover:shadow-lg transition-shadow duration-300"
                         style={{ animationDelay: `${index * 150}ms` }}
                       >
@@ -151,17 +162,21 @@ export default function ContactPage() {
               <div className="animate-fade-in-left animation-delay-600">
                 <Card className="overflow-hidden">
                   <CardContent className="p-0">
-                    <div className="h-64 bg-gradient-to-br from-primary/20 to-primary/30 flex items-center justify-center">
-                      <div className="text-center">
-                        <MapPin className="h-12 w-12 text-primary mx-auto mb-4" />
-                        <p className="text-lg font-medium text-gray-700">
-                          Interactive Map
-                        </p>
-                        <p className="text-gray-600">
-                          Map will be embedded here
-                        </p>
-                      </div>
-                    </div>
+                  <Card className="overflow-hidden">
+                    <CardContent className="p-0">
+                      <iframe
+                        title="Shakthi Picture Framing Location"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126745.13696339412!2d79.73087344335939!3d6.916225800000007!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2599dd4f0c32d%3A0x1c1b48522123afe3!2sJanahitha%20Picture%20Palace!5e0!3m2!1sen!2slk!4v1752649752019!5m2!1sen!2slk"
+                        width="100%"
+                        height="300"
+                        style={{ border: 0 }}
+                        loading="lazy"
+                        allowFullScreen
+                        referrerPolicy="no-referrer-when-downgrade"
+                        className="w-full h-64 rounded-b-md"
+                      />
+                    </CardContent>  
+                  </Card>
                   </CardContent>
                 </Card>
               </div>
@@ -187,8 +202,8 @@ export default function ContactPage() {
                         id="fullName"
                         {...register('fullName')}
                         className={`mt-1 ${
-                          errors.fullName && touchedFields.fullName 
-                            ? 'border-red-500 focus:border-red-500' 
+                          errors.fullName && touchedFields.fullName
+                            ? 'border-red-500 focus:border-red-500'
                             : ''
                         }`}
                         placeholder="Enter your full name"
@@ -208,8 +223,8 @@ export default function ContactPage() {
                         type="email"
                         {...register('email')}
                         className={`mt-1 ${
-                          errors.email && touchedFields.email 
-                            ? 'border-red-500 focus:border-red-500' 
+                          errors.email && touchedFields.email
+                            ? 'border-red-500 focus:border-red-500'
                             : ''
                         }`}
                         placeholder="Enter your email address"
@@ -228,8 +243,8 @@ export default function ContactPage() {
                         id="subject"
                         {...register('subject')}
                         className={`mt-1 ${
-                          errors.subject && touchedFields.subject 
-                            ? 'border-red-500 focus:border-red-500' 
+                          errors.subject && touchedFields.subject
+                            ? 'border-red-500 focus:border-red-500'
                             : ''
                         }`}
                         placeholder="What is your inquiry about?"
@@ -249,8 +264,8 @@ export default function ContactPage() {
                         {...register('message')}
                         rows={5}
                         className={`mt-1 resize-none ${
-                          errors.message && touchedFields.message 
-                            ? 'border-red-500 focus:border-red-500' 
+                          errors.message && touchedFields.message
+                            ? 'border-red-500 focus:border-red-500'
                             : ''
                         }`}
                         placeholder="Please provide details about your inquiry..."

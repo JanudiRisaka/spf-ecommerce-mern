@@ -1,10 +1,12 @@
 import express from 'express';
-import { getInquiries, updateInquiryStatus } from '../controllers/inquiryController';
+import { createInquiry, getInquiries, updateInquiryStatus } from '../controllers/inquiryController';
 import { protect, admin } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
+router.route('/').post(createInquiry);
 router.use(protect); // All routes require login, but only admins can access them via the main server file
+
 
 // GET /api/v1/inquiries - Get all inquiries (Admin only)
 router.route('/').get(admin, getInquiries);

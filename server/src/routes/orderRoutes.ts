@@ -1,18 +1,20 @@
+// ----------------- START OF CORRECTED orderRoutes.ts -----------------
 import express from 'express';
-import { getOrders, updateOrderStatus } from '../controllers/orderController';
+import { getOrders, updateOrderStatus, createOrder } from '../controllers/orderController';
 import { protect, admin } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-// Apply protect and admin middleware to all routes in this file
-router.use(protect, admin);
+// --- Define the routes with specific middleware ---
 
-// --- Define the routes ---
+// POST /api/v1/orders - A logged-in customer can create an order.
+router.route('/').post(protect, createOrder);
 
-// GET /api/v1/orders - Fetches all orders
-router.route('/').get(getOrders);
+// GET /api/v1/orders - Only an admin can see all orders.
+router.route('/').get(protect, admin, getOrders);
 
-// PUT /api/v1/orders/:id/status - Updates the status of a specific order
-router.route('/:id/status').put(updateOrderStatus);
+// PUT /api/v1/orders/:id/status - Only an admin can update status.
+router.route('/:id/status').put(protect, admin, updateOrderStatus);
 
 export default router;
+// ----------------- END OF CORRECTED orderRoutes.ts -----------------

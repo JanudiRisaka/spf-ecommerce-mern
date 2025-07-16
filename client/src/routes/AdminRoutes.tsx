@@ -24,18 +24,14 @@ const AdminRouteProtection = () => {
 // The Route Definitions as an array
 export const adminRoutes: RouteObject[] = [
   {
-    element: <AdminRouteProtection />, // The gatekeeper for all routes inside
+    element: <AdminRouteProtection />,
     children: [
       {
-        path: '/admin', // All routes inside are relative to /admin
-        element: <AdminLayout />, // All routes inside render within the AdminLayout
+        path: '/admin',
+        element: <AdminLayout />,
         children: [
-          {
-            index: true, // This matches the exact path "/admin"
-            element: <DashboardPage />
-          },
-          {
-            path: 'products', // This matches "/admin/products"
+          { index: true, element: <DashboardPage /> },
+          { path: 'products', // This matches "/admin/products"
             element: <AdminProductsPage />
           },
           {

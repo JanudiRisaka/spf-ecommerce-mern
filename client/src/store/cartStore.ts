@@ -1,93 +1,59 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { CartState, CartItem } from '@/types';
-import type { Product } from '@/lib/mockData';
+import type { CartState, IProduct } from '@/types';
 
 export const useCartStore = create<CartState>()(
-  persist(
+  persist<CartState>(
     (set, get) => ({
       items: [],
+      shippingAddress: undefined,
 
-      addToCart: (product: Product) => {
+      addToCart: (product: IProduct, qty: number) => {
         const { items } = get();
-        const existingItem = items.find(item => item.productId === product.id);
+        const existingItem = items.find(item => item.product === product._id);
 
         if (existingItem) {
           set({
             items: items.map(item =>
-              item.productId === product.id
-                ? { ...item, quantity: item.quantity + 1 }
+              item.product === product._id
+                ? { ...item, quantity: item.quantity + qty }
                 : item
             ),
           });
         } else {
           set({
-            items: [...items, { 
-              productId: product.id,
-              name: product.name,
-              price: product.price,
-              imageUrl: product.imageUrl,
-              quantity: 1 
-            }],
+            items: [
+              ...items,
+              {
+                product: product._id,
+                name: product.name,
+                price: product.price,
+                image: product.images[0],
+                quantity: qty,
+              },
+            ],
           });
         }
       },
 
-      addItem: (productId: string, price: number) => {
-        // Legacy function for backward compatibility
-        const { items } = get();
-        const existingItem = items.find(item => item.productId === productId);
-
-        if (existingItem) {
-          set({
-            items: items.map(item =>
-              item.productId === productId
-                ? { ...item, quantity: item.quantity + 1 }
-                : item
-            ),
-          });
-        } else {
-          set({
-            items: [...items, { productId, quantity: 1, price, name: '', imageUrl: '' }],
-          });
-        }
-      },
+      saveShippingAddress: (address) => set({ shippingAddress: address }),
 
       removeFromCart: (productId: string) => {
-        const { items } = get();
         set({
-          items: items.filter(item => item.productId !== productId),
+          items: get().items.filter(item => item.product !== productId),
         });
-      },
-
-      removeItem: (productId: string) => {
-        // Legacy function for backward compatibility
-        get().removeFromCart(productId);
       },
 
       updateQuantity: (productId: string, quantity: number) => {
-        const { items } = get();
         if (quantity <= 0) {
           get().removeFromCart(productId);
-          return;
+        } else {
+          set({
+            items: get().items.map(item =>
+              item.product === productId ? { ...item, quantity } : item
+            ),
+          });
         }
-
-        set({
-          items: items.map(item =>
-            item.productId === productId
-              ? { ...item, quantity }
-              : item
-          ),
-        });
-      },
-
-      clearCart: () => {
-        set({ items: [] });
-      },
-
-      getCartTotal: () => {
-        const { items } = get();
-        return items.reduce((total, item) => total + (item.price * item.quantity), 0);
       },
 
       getTotalItems: () => {
@@ -95,9 +61,13 @@ export const useCartStore = create<CartState>()(
         return items.reduce((total, item) => total + item.quantity, 0);
       },
 
-      getTotalPrice: () => {
+      getCartTotal: () => {
         const { items } = get();
-        return items.reduce((total, item) => total + (item.price * item.quantity), 0);
+        return items.reduce((total, item) => total + item.price * item.quantity, 0);
+      },
+
+      clearCart: () => {
+        set({ items: [], shippingAddress: undefined });
       },
     }),
     {

@@ -15,6 +15,8 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from '@/components/ui/navigation-menu';
+import { Shield } from 'lucide-react';
+
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
 
@@ -30,7 +32,31 @@ export default function Header() {
 
   const cartItemCount = getTotalItems();
 
+
   return (
+    <>
+      {/* 1. Conditionally render the Admin Bar only if an admin is logged in */}
+      {isLoggedIn && user?.role === 'admin' && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-400 text-black p-2 flex items-center justify-between text-sm shadow-lg">
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            <span>You are viewing the site as an Administrator.</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link to="/admin" className="font-bold hover:underline">
+              Go to Admin Dashboard
+            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout} // Use the correct logout handler
+              className="h-auto p-1 text-black hover:bg-yellow-500"
+            >
+              Logout
+            </Button>
+          </div>
+        </div>
+      )}
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
@@ -151,5 +177,6 @@ export default function Header() {
         </div>
       </div>
     </header>
+    </>
   );
 }

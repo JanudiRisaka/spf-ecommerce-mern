@@ -1,7 +1,8 @@
+// ----------------- START OF CORRECTED Order.ts -----------------
+
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
-// --- 1. DEFINE THE INTERFACE ---
-// This tells TypeScript what an Order document looks like.
+// --- 1. THE COMPLETE INTERFACE ---
 export interface IOrder extends Document {
   user: Types.ObjectId;
   orderItems: {
@@ -18,15 +19,19 @@ export interface IOrder extends Document {
     country: string;
   };
   totalPrice: number;
-  paymentStatus: 'pending' | 'paid' | 'failed';
-  orderStatus: 'pending' | 'processing' | 'shipped' | 'delivered';
-  deliveredAt?: Date; // It's optional, so add '?'
+  isPaid: boolean; // <-- ADDED
+  paidAt?: Date;   // <-- ADDED
+  paymentResult?: { // <-- ADDED
+    id: string;
+    status: string;
+  };
+  orderStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'; // Combined enum
+  deliveredAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// --- 2. YOUR EXISTING SCHEMA ---
-// The schema definition itself doesn't need to change much, but we add the new field.
+// --- 2. THE COMPLETE SCHEMA ---
 const orderSchema: Schema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
@@ -46,13 +51,28 @@ const orderSchema: Schema = new mongoose.Schema(
       country: { type: String, required: true },
     },
     totalPrice: { type: Number, required: true, default: 0.0 },
-    paymentStatus: { type: String, required: true, default: 'pending', enum: ['pending', 'paid', 'failed'] },
-    orderStatus: { type: String, required: true, default: 'pending', enum: ['pending', 'processing', 'shipped', 'delivered'] },
-    deliveredAt: { type: Date }, // Add the field to the schema
+
+    // --- ADDED missing payment fields ---
+    isPaid: { type: Boolean, required: true, default: false },
+    paidAt: { type: Date },
+    paymentResult: {
+      id: { type: String },
+      status: { type: String },
+    },
+
+    orderStatus: {
+      type: String,
+      required: true,
+      default: 'pending',
+      enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'] // Combined enum
+    },
+    deliveredAt: { type: Date },
   },
   { timestamps: true }
 );
 
-// --- 3. CONNECT THE INTERFACE TO THE MODEL ---
+// --- 3. CONNECT THE INTERFACE TO THE MODEL (No change here) ---
 const Order = mongoose.model<IOrder>('Order', orderSchema);
 export default Order;
+
+// ----------------- END OF CORRECTED Order.ts -----------------

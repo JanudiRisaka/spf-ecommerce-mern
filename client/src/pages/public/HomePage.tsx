@@ -1,26 +1,31 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import ProductCard from '@/components/public/ProductCard';
-import { mockProducts } from '@/lib/mockData';
 import { Award, Clock, Shield, ArrowRight } from 'lucide-react';
+import { getLatestProducts } from '@/api/productApi';
+import { IProduct } from '@/types';
 
 export default function HomePage() {
-  // Get first 4 products for featured section
-  const featuredProducts = mockProducts.slice(0, 4);
+const [latestProducts, setLatestProducts] = useState<IProduct[]>([]);
+
+  useEffect(() => {
+    getLatestProducts(4).then(setLatestProducts);
+  }, []);
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
         {/* Background Image Overlay */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
           style={{
             backgroundImage: 'url(https://images.pexels.com/photos/1579708/pexels-photo-1579708.jpeg?auto=compress&cs=tinysrgb&w=1920)'
           }}
         />
-        
+
         {/* Hero Content */}
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in-up">
@@ -30,9 +35,9 @@ export default function HomePage() {
           <p className="text-xl md:text-2xl mb-8 text-gray-300 animate-fade-in-up animation-delay-300">
             Premium picture framing services with over 20 years of craftsmanship excellence
           </p>
-          <Button 
-            asChild 
-            size="lg" 
+          <Button
+            asChild
+            size="lg"
             className="text-lg px-8 py-6 animate-fade-in-up animation-delay-600 hover:scale-105 transition-transform duration-300"
           >
             <Link to="/products">
@@ -61,11 +66,11 @@ export default function HomePage() {
               Discover our most popular frames, carefully crafted to showcase your precious memories
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product, index) => (
-              <div 
-                key={product.id} 
+            {latestProducts.map((product, index) => (
+              <div
+                key={product._id}
                 className="animate-fade-in-up"
                 style={{ animationDelay: `${index * 150}ms` }}
               >

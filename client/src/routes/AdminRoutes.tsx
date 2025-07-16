@@ -9,6 +9,7 @@ import ProductFormPage from '@/pages/admin/ProductFormPage';
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
 import AdminUsersPage from '@/pages/admin/AdminUsersPage';
 import AdminInquiriesPage from '@/pages/admin/AdminInquiriesPage';
+import AdminProfilePage from '@/pages/admin/AdminProfilePage';
 
 // The Gatekeeper Component (no changes here)
 const AdminRouteProtection = () => {
@@ -16,11 +17,10 @@ const AdminRouteProtection = () => {
   const location = useLocation();
 
   if (!isLoggedIn || user?.role !== 'admin') {
-    return <Navigate to="/admin/login" state={{ from: location }} replace />;
-  }
-  return <Outlet />;
+      return <Navigate to="/admin/login" state={{ from: location }} replace />;
+    }
+    return <Outlet />; // Renders the nested routes
 };
-
 // The Route Definitions as an array
 export const adminRoutes: RouteObject[] = [
   {
@@ -31,31 +31,13 @@ export const adminRoutes: RouteObject[] = [
         element: <AdminLayout />,
         children: [
           { index: true, element: <DashboardPage /> },
-          { path: 'products', // This matches "/admin/products"
-            element: <AdminProductsPage />
-          },
-          {
-            path: 'products/new', // This matches "/admin/products/new"
-            element: <ProductFormPage />
-          },
-          // --- THIS IS THE FIX ---
-          // This now correctly matches "/admin/products/edit/:id"
-          {
-            path: 'products/edit/:id',
-            element: <ProductFormPage />
-          },
-          {
-            path: 'orders', // This matches "/admin/orders"
-            element: <AdminOrdersPage />
-          },
-          {
-            path: 'users', // This matches "/admin/users"
-            element: <AdminUsersPage />
-          },
-          {
-            path: 'inquiries', // This matches "/admin/inquiries"
-            element: <AdminInquiriesPage />
-          },
+          { path: 'products', element: <AdminProductsPage /> },
+          { path: 'products/new', element: <ProductFormPage /> },
+          { path: 'products/edit/:id', element: <ProductFormPage /> },
+          { path: 'orders', element: <AdminOrdersPage /> },
+          { path: 'users', element: <AdminUsersPage /> },
+          { path: 'inquiries', element: <AdminInquiriesPage /> },
+          { path: 'profile', element: <AdminProfilePage /> }
         ],
       },
     ],

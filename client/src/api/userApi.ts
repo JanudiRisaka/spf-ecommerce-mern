@@ -1,9 +1,11 @@
+// ----------------- START OF CORRECTED userApi.ts -----------------
+
 import axios from 'axios';
-import { User, IUserProfile } from '@/types';
+import { User } from '@/types';
 
 const API_URL = '/api/v1/users';
 
-// This function will fetch all users for the admin panel
+// --- For Admin Panel ---
 export const getUsers = async (token: string): Promise<User[]> => {
   try {
     const response = await axios.get(API_URL, {
@@ -16,7 +18,6 @@ export const getUsers = async (token: string): Promise<User[]> => {
   }
 };
 
-// This function will delete a user by their ID
 export const deleteUser = async (userId: string, token: string): Promise<void> => {
   try {
     await axios.delete(`${API_URL}/${userId}`, {
@@ -28,10 +29,12 @@ export const deleteUser = async (userId: string, token: string): Promise<void> =
   }
 };
 
-// Get current user's profile (for user-side profile page)
-export const getUserProfile = async (token: string): Promise<IUserProfile> => {
+
+// --- For User Profile Page (for the currently logged-in user) ---
+export const getMyProfile = async (token: string): Promise<User> => {
   try {
-    const response = await axios.get(`${API_URL}/me`, {
+    // This calls GET /api/v1/users/profile
+    const response = await axios.get(`${API_URL}/profile`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data.user;
@@ -41,10 +44,10 @@ export const getUserProfile = async (token: string): Promise<IUserProfile> => {
   }
 };
 
-// Update current user's profile
-export const updateUserProfile = async (data: Partial<IUserProfile>, token: string): Promise<IUserProfile> => {
+export const updateMyProfile = async (profileData: Partial<User>, token: string): Promise<User> => {
   try {
-    const response = await axios.put(`${API_URL}/me`, data, {
+    // This calls PUT /api/v1/users/profile
+    const response = await axios.put(`${API_URL}/profile`, profileData, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data.user;
@@ -54,11 +57,4 @@ export const updateUserProfile = async (data: Partial<IUserProfile>, token: stri
   }
 };
 
-export const deleteUserAccount = async (userId: string) => {
-  try {
-    await axios.delete(`/api/v1/users/${userId}`);
-  } catch (error) {
-    console.error('Error deleting user account:', error);
-    throw error;
-  }
-};
+// ----------------- END OF CORRECTED userApi.ts -----------------

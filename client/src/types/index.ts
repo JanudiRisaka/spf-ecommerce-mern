@@ -36,7 +36,9 @@ export interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (email: string, password: string, name: string) => Promise<void>;
+  setUser: (user: User) => void;
 }
+
 
 export interface CartItem {
   product: string;

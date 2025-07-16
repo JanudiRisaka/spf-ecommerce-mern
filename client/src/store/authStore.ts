@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AuthState } from '@/types';
+import type { AuthState, User  } from '@/types';
 
 // Import both API functions
 import { registerUser as registerApi, loginUser as loginApi } from '@/api/authApi';
@@ -52,6 +52,13 @@ export const useAuthStore = create<AuthState>()(
           user: null,
           token: null,
         });
+      },
+
+      setUser: (newUser: User) => {
+        set((state) => ({
+          ...state,
+          user: { ...state.user, ...newUser }, // Merges new user data with existing
+        }));
       },
     }),
     {

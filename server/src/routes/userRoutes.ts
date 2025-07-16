@@ -1,19 +1,23 @@
 import express from 'express';
-import { getUsers, deleteUser, getUserProfile, updateUserProfile } from '../controllers/userController';
+import {
+  getUsers,
+  deleteUser,
+  getUserProfile,
+  updateUserProfile
+} from '../controllers/userController';
 import { protect, admin } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
+// --- ADD THESE TWO ROUTES ---
+// These are for the currently logged-in user to manage their own profile.
+// They only need the 'protect' middleware, not 'admin'.
 router.route('/profile')
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);
 
-// All routes in this file will first go through the 'protect' middleware,
-// then the 'admin' middleware.
-router.use(protect, admin);
-
-// Define the routes
-router.route('/').get(getUsers);
-router.route('/:id').delete(deleteUser);
+// --- Admin-only routes ---
+router.route('/').get(protect, admin, getUsers);
+router.route('/:id').delete(protect, admin, deleteUser);
 
 export default router;

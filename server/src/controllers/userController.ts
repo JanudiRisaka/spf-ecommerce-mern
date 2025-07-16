@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
-
+import bcrypt from 'bcryptjs';
 /**
  * @desc    Get all users
  * @route   GET /api/v1/users
@@ -50,18 +50,13 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
 export const getUserProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
-      res.status(401).json({ success: false, message: 'Unauthorized' });
+      res.status(401).json({ success: false, message: 'Not authorized' });
       return;
     }
-
-    const user = await User.findById(req.user._id).select('-password');
-    if (!user) {
-      res.status(404).json({ success: false, message: 'User not found' });
-      return;
-    }
-    res.status(200).json({ success: true, user });
+    // req.user is attached by the 'protect' middleware. We don't need to find them again.
+    res.status(200).json({ success: true, user: req.user });
   } catch (error) {
-    console.error('Profile error:', error);
+    console.error('Get profile error:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
@@ -73,35 +68,39 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
  */
 export const updateUserProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-        if (!req.user) {
-      res.status(401).json({ success: false, message: 'Unauthorized' });
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Not authorized' });
       return;
     }
 
     const user = await User.findById(req.user._id);
-
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });
       return;
     }
 
+    // Update fields if they are provided in the request body
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
 
+    // Optional: Handle password change
     if (req.body.password) {
-      user.password = req.body.password; // hash in model middleware
+      // You should add validation (e.g., password length) here
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(req.body.password, salt);
     }
 
-    await user.save();
+    const updatedUser = await user.save();
 
+    // Respond with the updated user data (and a new token if you want to be extra secure)
     res.status(200).json({
       success: true,
-      message: 'Profile updated successfully',
       user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        createdAt: updatedUser.createdAt,
       },
     });
   } catch (error) {

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Order, { IOrder } from '../models/Order'; // Import the IOrder interface
+import Order, { IOrder } from '../models/Order';
 import transporter from '../config/nodemailer';
 
 /**
@@ -7,7 +7,7 @@ import transporter from '../config/nodemailer';
  * @route   GET /api/v1/orders
  * @access  Private/Admin
  */
-export const getOrders = async (req: Request, res: Response): Promise<void> => {
+export const getOrders = async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const orders = await Order.find({}).populate('user', 'name email').sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: orders.length, data: orders });
@@ -22,7 +22,7 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
  * @route   PUT /api/v1/orders/:id/status
  * @access  Private/Admin
  */
-export const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateOrderStatus = async (req: Request, res: Response): Promise<Response | void> => {
   try {
     // --- THIS IS THE MAIN FIX ---
     // Add the type <IOrder> to tell TypeScript what 'order' will be.
@@ -56,38 +56,59 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
 /**
  * @desc    Create a new order
  * @route   POST /api/v1/orders
- * @access  Private
+ * @access  Private (for logged-in users)
  */
-export const createOrder = async (req: Request, res: Response): Promise<void> => {
+export const createOrder = async (req: Request, res: Response): Promise<Response | void> => {
   try {
-    // ... (your existing createOrder logic up to the point of saving) ...
+    // 1. Authenticated User Check (from 'protect' middleware)
     if (!req.user) {
-      res.status(401).json({ message: 'Not authorized, no user data' });
-      return;
+      return res.status(401).json({ success: false, message: 'Not authorized, no user data' });
     }
-    const { orderItems, shippingAddress, totalPrice, isPaid, paidAt, paymentResult } = req.body;
+
+    // 2. Destructure all expected properties from the request body
+    const {
+      orderItems,
+      shippingAddress,
+      totalPrice,
+      isPaid,
+      paidAt,
+      paymentResult
+    } = req.body;
+
+    // 3. Validation: Ensure there are items in the order
     if (!orderItems || orderItems.length === 0) {
-      res.status(400).json({ message: 'No order items' });
-      return;
+      return res.status(400).json({ success: false, message: 'No order items' });
     }
+
+    // 4. Transform frontend data to match the backend schema
+    // This is a crucial step to prevent validation errors.
+    const transformedOrderItems = orderItems.map((item: any) => ({
+      name: item.name,
+      qty: item.quantity, // The frontend sends 'quantity', but our schema uses 'qty'
+      image: item.image,
+      price: item.price,
+      product: item.product, // This should be the MongoDB ObjectId for the product
+    }));
+
+    // 5. Create a new Order instance with the validated and transformed data
     const order = new Order({
-      user: req.user._id,
-      orderItems: orderItems.map((item: any) => ({
-        name: item.name,
-        qty: item.quantity,
-        image: item.image,
-        price: item.price,
-        product: item.product,
-      })),
+      user: req.user._id, // Attach the order to the logged-in user
+      orderItems: transformedOrderItems,
       shippingAddress,
       totalPrice,
       isPaid,
       paidAt,
       paymentResult,
     });
+
+    // 6. Save the order to the database
     const createdOrder = await order.save();
 
-    // The email logic will now work because 'transporter' is defined.
+    // 7. Send the success response back to the client immediately.
+    // Don't make the user wait for the email to be sent.
+    res.status(201).json({ success: true, order: createdOrder });
+
+    // 8. Asynchronously send the confirmation email in the background.
     try {
       const mailOptions = {
         from: `"Shakthi Picture Framing" <${process.env.SENDER_EMAIL}>`,
@@ -100,23 +121,20 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
           <p><strong>Order ID:</strong> ${createdOrder._id}</p>
           <p><strong>Total Amount:</strong> $${createdOrder.totalPrice.toFixed(2)}</p>
           <p>We will notify you again once your order has shipped.</p>
-          <br>
-          <p>Thanks,</p>
-          <p>The Shakthi Picture Framing Team</p>
         `,
       };
-
       await transporter.sendMail(mailOptions);
       console.log(`Order confirmation email sent successfully to ${req.user.email}`);
-
     } catch (emailError) {
-      console.error(`Failed to send order confirmation email to ${req.user.email}:`, emailError);
+      // If the email fails, just log it. The order was still created successfully.
+      console.error(`Failed to send order confirmation email for order ${createdOrder._id}:`, emailError);
     }
 
-    res.status(201).json({ success: true, order: createdOrder }); // Changed to 'order' to match frontend
-
   } catch (error) {
+    // This will catch any errors from the database save operation
     console.error("CREATE ORDER FAILED:", error);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    if (!res.headersSent) { // Prevent sending a second response if one was already sent
+      res.status(500).json({ success: false, message: 'Server Error' });
+    }
   }
 };

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Order, { IOrder } from '../models/Order'; // Import the IOrder interface
+import transporter from '../config/nodemailer';
 
 /**
  * @desc    Get all orders
@@ -57,24 +58,18 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
  * @route   POST /api/v1/orders
  * @access  Private
  */
-// ----------------- START OF CORRECTED createOrder FUNCTION -----------------
 export const createOrder = async (req: Request, res: Response): Promise<void> => {
   try {
-    console.log("--- RECEIVED CREATE ORDER REQUEST ---");
-  console.log("Request Body:", JSON.stringify(req.body, null, 2));
-  console.log("-----------------------------------");
+    // ... (your existing createOrder logic up to the point of saving) ...
     if (!req.user) {
       res.status(401).json({ message: 'Not authorized, no user data' });
       return;
     }
-
     const { orderItems, shippingAddress, totalPrice, isPaid, paidAt, paymentResult } = req.body;
-
     if (!orderItems || orderItems.length === 0) {
       res.status(400).json({ message: 'No order items' });
       return;
     }
-
     const order = new Order({
       user: req.user._id,
       orderItems: orderItems.map((item: any) => ({
@@ -90,10 +85,36 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       paidAt,
       paymentResult,
     });
-
     const createdOrder = await order.save();
 
-    res.status(201).json({ success: true, data: createdOrder });
+    // The email logic will now work because 'transporter' is defined.
+    try {
+      const mailOptions = {
+        from: `"Shakthi Picture Framing" <${process.env.SENDER_EMAIL}>`,
+        to: req.user.email,
+        subject: `Your Order Confirmation #${createdOrder._id}`,
+        html: `
+          <h1>Thank you for your order, ${req.user.name}!</h1>
+          <p>We've received your order and will begin processing it shortly.</p>
+          <h2>Order Summary</h2>
+          <p><strong>Order ID:</strong> ${createdOrder._id}</p>
+          <p><strong>Total Amount:</strong> $${createdOrder.totalPrice.toFixed(2)}</p>
+          <p>We will notify you again once your order has shipped.</p>
+          <br>
+          <p>Thanks,</p>
+          <p>The Shakthi Picture Framing Team</p>
+        `,
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Order confirmation email sent successfully to ${req.user.email}`);
+
+    } catch (emailError) {
+      console.error(`Failed to send order confirmation email to ${req.user.email}:`, emailError);
+    }
+
+    res.status(201).json({ success: true, order: createdOrder }); // Changed to 'order' to match frontend
+
   } catch (error) {
     console.error("CREATE ORDER FAILED:", error);
     res.status(500).json({ success: false, message: 'Server Error' });

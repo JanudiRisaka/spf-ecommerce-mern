@@ -17,6 +17,7 @@ import inquiryRoutes from './routes/inquiryRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
+import chatbotRoutes from './routes/chatbotRoutes';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -51,6 +52,7 @@ app.use('/api/v1/inquiries', inquiryRoutes);
 app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/payment', paymentRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/chatbot', chatbotRoutes);
 
 // Simple GET route
 app.get('/api/v1', (req, res) => {

@@ -138,3 +138,24 @@ export const createOrder = async (req: Request, res: Response): Promise<Response
     }
   }
 };
+
+
+/**
+ * @desc    Get logged in user's orders
+ * @route   GET /api/v1/orders/myorders
+ * @access  Private
+ */
+export const getMyOrders = async (req: Request, res: Response): Promise<Response | void> => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized, no user data' });
+    }
+    // Find orders where the 'user' field matches the logged-in user's ID
+    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, orders });
+  } catch (error) {
+    console.error('Get My Orders error:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};

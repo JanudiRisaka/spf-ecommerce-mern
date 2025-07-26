@@ -1,62 +1,104 @@
-// ----------------- START OF CORRECTED UserProfilePage.tsx -----------------
+// ----------------- START OF FINAL UserProfilePage.tsx -----------------
 
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
-import ProfileHeader from '@/components/profile/ProfileHeader';
-import ProfileDetailsCard from '@/components/profile/ProfileDetailsCard';
-import ShippingForm from '@/components/profile/ShippingForm';
-import OrderHistory from '@/components/profile/OrderHistory';
-import AccountActions from '@/components/profile/AccountActions';
-import { deleteUser } from '@/api/userApi';
-import { toast } from 'sonner'; // <-- 1. FIX: Use 'sonner' for consistency
-import { useNavigate } from 'react-router-dom'; // For redirecting
-import { useEffect } from 'react';
+import { getMyProfile, updateMyProfile } from '@/api/userApi';
+import { getMyOrders } from '@/api/orderApi'; // Correctly importing the new function
+import { UpdateUserData, PasswordChangeData, IOrder } from '@/types'; // Removed unused 'User' import
+
+import { Toaster, toast } from 'sonner';
+import { LoadingPage } from '@/components/shared/LoadingPage';
+// --- FIX: Use named imports for all components ---
+import { ProfileHeader } from '@/components/profile/ProfileHeader';
+import { AccountSettings } from '@/components/profile/AccountSettings';
+import { OrderHistory } from '@/components/profile/OrderHistory';
+import { AccountManagement } from '@/components/profile/AccountManagement'; // Changed from AccountActions to match component
 
 export default function UserProfilePage() {
-  // Use the selector pattern to get state
-  const { user, token, logout } = useAuthStore((state) => state);
+  const { user, token, setUser, logout } = useAuthStore();
+  const [orders, setOrders] = useState<IOrder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // --- 2. THE MAIN FIX: Handle the case where the user is not logged in ---
-  // This effect will run if the user logs out while on the page, or if they try to access it directly.
   useEffect(() => {
-    if (!user) {
-      // Redirect to login page if there's no user
-      navigate('/auth/login');
-    }
-  }, [user, navigate]);
-
-  const handleDeleteAccount = async () => {
-    if (window.confirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) {
-      // We already know user and token exist because of the check above
-      try {
-        await deleteUser(user!._id, token!);
-        toast.success("Your account has been deleted.");
-        logout(); // This will trigger the useEffect above to redirect
-      } catch (error) {
-        toast.error("Failed to delete account.");
-        console.error(error);
+    const loadInitialData = async () => {
+      if (!token) {
+        toast.error("Please log in to view your profile.");
+        navigate('/auth/login');
+        return;
       }
+      try {
+        const [profileData, orderData] = await Promise.all([
+          getMyProfile(token),
+          getMyOrders(token)
+        ]);
+
+        setUser(profileData);
+        setOrders(orderData);
+      } catch (error) {
+        console.error("Failed to load user data:", error);
+        toast.error("Failed to load your data. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadInitialData();
+  }, [token, setUser, navigate]);
+
+  const handleUpdateUser = async (data: UpdateUserData): Promise<void> => {
+    if (!token) throw new Error("Authentication error");
+    try {
+      const updatedUser = await updateMyProfile(data, token);
+      setUser(updatedUser);
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update profile. Please try again.');
+      throw error;
     }
   };
 
-  // --- 3. RENDER a loading state or nothing while the check runs ---
-  if (!user) {
-    // Or return a <LoadingPage /> component
-    return <div>Loading profile...</div>;
+  // Handler stubs for future implementation
+  const handleChangePassword = async (data: PasswordChangeData): Promise<void> => { console.log(data); };
+  const handleDeleteAccount = async (): Promise<void> => { console.log("Deleting account..."); };
+  const handleExportData = async (): Promise<void> => { console.log("Exporting data..."); };
+
+  if (isLoading) {
+    return <LoadingPage />;
   }
 
-  // If we get here, TypeScript knows 'user' is not null.
-  return (
-    <div className="max-w-4xl mx-auto py-12 space-y-10">
-      <ProfileHeader user={user} />
-      <ProfileDetailsCard user={user} />
-      <ShippingForm userId={user._id} />
-      <OrderHistory userId={user._id} />
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg text-red-600">Could not load profile. Please log in.</p>
+      </div>
+    );
+  }
 
-      {/* --- 4. FIX: Pass the correct function name --- */}
-      <AccountActions onDelete={handleDeleteAccount} onLogout={logout} />
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold">My Account</h1>
+          <p className="text-gray-600">Manage your profile, orders, and settings.</p>
+        </div>
+        <div className="space-y-10">
+          <ProfileHeader user={user} />
+          <AccountSettings
+            user={user}
+            onUpdateUser={handleUpdateUser}
+            onChangePassword={handleChangePassword}
+          />
+          <OrderHistory orders={orders} />
+          <AccountManagement
+            onDeleteAccount={handleDeleteAccount}
+            onExportData={handleExportData}
+          />
+        </div>
+      </div>
+      <Toaster richColors position="top-right" />
     </div>
   );
 }
-
-// ----------------- END OF CORRECTED UserProfilePage.tsx -----------------
+// ----------------- END OF FINAL UserProfilePage.tsx -----------------

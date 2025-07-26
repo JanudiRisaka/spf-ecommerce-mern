@@ -1,4 +1,4 @@
-
+// client/src/types/index.ts
 export interface IProduct {
   _id: string;
   name: string;
@@ -28,6 +28,19 @@ export interface IUserProfile extends Partial<User> {
   country?: string;
 }
 
+export interface UpdateUserData {
+  name: string;
+  email: string;
+  // Add other fields you want to allow updating
+}
+
+// Type for the "Change Password" form data
+export interface PasswordChangeData {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 export interface AuthState {
   isLoggedIn: boolean;

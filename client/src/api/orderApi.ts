@@ -44,3 +44,16 @@ export const createOrder = async (orderData: any, token: string): Promise<IOrder
     throw error;
   }
 };
+
+export const getMyOrders = async (token: string): Promise<IOrder[]> => {
+  try {
+    // This will call a new backend route: GET /api/v1/orders/myorders
+    const response = await axios.get(`${API_URL}/myorders`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.orders || [];
+  } catch (error) {
+    console.error("Failed to fetch user orders:", error);
+    throw error;
+  }
+};

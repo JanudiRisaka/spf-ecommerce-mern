@@ -1,11 +1,13 @@
 // ----------------- START OF CORRECTED orderRoutes.ts -----------------
 import express from 'express';
-import { getOrders, updateOrderStatus, createOrder } from '../controllers/orderController';
+import { getOrders, updateOrderStatus, createOrder, getMyOrders } from '../controllers/orderController';
 import { protect, admin } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 // --- Define the routes with specific middleware ---
+// This route only uses 'protect', as any logged-in user can see their own orders.
+router.route('/myorders').get(protect, getMyOrders);
 
 // POST /api/v1/orders - A logged-in customer can create an order.
 router.route('/').post(protect, createOrder);

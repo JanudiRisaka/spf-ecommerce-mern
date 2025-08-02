@@ -28,18 +28,22 @@ export function DummyCard({ isOpen, onClose }: DummyCardProps) {
   };
 
   return (
+    <div className="">
+      <button onClick={onClose} className="absolute top-4 right-4 hover:text-white transition-colors white">
+            <X size={20} className=""/>
+    </button>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-transparent border-none shadow-none p-0">
+      <DialogContent className="sm:max-w-md bg-transparent border-none shadow-none p-0 text-white">
         <DialogHeader>
           <DialogTitle className="sr-only">Stripe Test Card Information</DialogTitle>
         </DialogHeader>
-        <div className="w-[375px] h-[225px] p-4 rounded-xl relative overflow-hidden shadow-2xl text-white font-sans
+        <div className="w-[375px] h-[225px] p-4 rounded-xl relative overflow-hidden shadow-2xl font-sans
                         bg-gradient-to-br from-gray-800 to-black">
 
           {/* Close Button */}
-          <button onClick={onClose} className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors">
+          {/* <button onClick={onClose} className="absolute top-4 right-4 text-gray-800 hover:text-white transition-colors bg-slate-50">
             <X size={20} />
-          </button>
+          </button> */}
 
           {/* Chip */}
           <div className="absolute top-4 left-4 w-12 h-9 bg-gradient-to-br from-gray-400 to-yellow-500 rounded-md" />
@@ -89,5 +93,6 @@ export function DummyCard({ isOpen, onClose }: DummyCardProps) {
         </div>
       </DialogContent>
     </Dialog>
+    </div>
   );
 };

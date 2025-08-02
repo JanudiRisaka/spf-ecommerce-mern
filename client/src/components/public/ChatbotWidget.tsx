@@ -59,7 +59,7 @@ const ChatbotWidget: React.FC = () => {
         <Card className="fixed bottom-24 right-4 w-80 h-[500px] shadow-xl z-50 flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 border-b">
             <CardTitle className="text-lg font-medium">Chat Support</CardTitle>
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8">
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8 text-white">
               <X className="h-4 w-4" />
             </Button>
           </CardHeader>

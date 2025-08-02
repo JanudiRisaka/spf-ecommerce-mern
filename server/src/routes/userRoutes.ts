@@ -3,7 +3,8 @@ import {
   getUsers,
   deleteUser,
   getUserProfile,
-  updateUserProfile
+  updateUserProfile,
+  changeUserPassword
 } from '../controllers/userController';
 import { protect, admin } from '../middleware/authMiddleware';
 
@@ -19,5 +20,6 @@ router.route('/profile')
 // --- Admin-only routes ---
 router.route('/').get(protect, admin, getUsers);
 router.route('/:id').delete(protect, admin, deleteUser);
+router.post('/change-password', protect, changeUserPassword);
 
 export default router;

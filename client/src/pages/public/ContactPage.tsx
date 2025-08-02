@@ -62,17 +62,16 @@ export default function ContactPage() {
       icon: MapPin,
       title: 'Visit Our Showroom',
       details: [
-        '123 Art Street, Creative District',
-        'Chennai, Tamil Nadu 600001',
-        'India'
+        '33A 5th Ln, Colombo 00300',
+        'Sri Lanka',
       ]
     },
     {
       icon: Phone,
       title: 'Call Us',
       details: [
-        '+91 98765 43210',
-        '+91 44 2345 6789',
+        '+94 7593 62837',
+        '+94 7724 46289',
         'Mon-Sat: 9 AM - 7 PM'
       ]
     },
@@ -80,9 +79,7 @@ export default function ContactPage() {
       icon: Mail,
       title: 'Email Us',
       details: [
-        'info@shakthiframing.com',
-        'orders@shakthiframing.com',
-        'support@shakthiframing.com'
+        'shakthiframing@gmail.com'
       ]
     },
     {
@@ -175,7 +172,7 @@ export default function ContactPage() {
                         referrerPolicy="no-referrer-when-downgrade"
                         className="w-full h-64 rounded-b-md"
                       />
-                    </CardContent>  
+                    </CardContent>
                   </Card>
                   </CardContent>
                 </Card>

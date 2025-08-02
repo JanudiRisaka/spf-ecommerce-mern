@@ -1,8 +1,8 @@
 // ----------------- START OF CORRECTED userApi.ts -----------------
-
+// client/src/api/userApi.ts
 import axios from 'axios';
 import { User } from '@/types';
-
+import { PasswordChangeData } from '@/types'; // Ensure this import matches your types file
 const API_URL = '/api/v1/users';
 
 // --- For Admin Panel ---
@@ -28,7 +28,6 @@ export const deleteUser = async (userId: string, token: string): Promise<void> =
     throw error;
   }
 };
-
 
 // --- For User Profile Page (for the currently logged-in user) ---
 export const getMyProfile = async (token: string): Promise<User> => {
@@ -56,5 +55,25 @@ export const updateMyProfile = async (profileData: Partial<User>, token: string)
     throw error;
   }
 };
+
+export const onChangePassword = async (
+  { currentPassword, newPassword }: PasswordChangeData,
+  token: string
+): Promise<void> => {
+  const response = await fetch('/api/v1/users/change-password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`, // ✅ send token
+    },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Password change failed');
+  }
+};
+
 
 // ----------------- END OF CORRECTED userApi.ts -----------------

@@ -38,12 +38,12 @@ export default function ProductCard({ product }: ProductCardProps) {
             </CardTitle>
             {/* Conditionally render the "Out of Stock" badge */}
             {!isInStock && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-sm">
                 Out of Stock
               </Badge>
             )}
           </div>
-          <p className="text-sm text-muted-foreground">{product.category}</p>
+          <p className="text-lg text-muted-foreground">{product.category}</p>
         </CardHeader>
 
         <CardFooter className="pt-0">
@@ -53,7 +53,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
             {/* Conditionally render the "In Stock" badge */}
             {isInStock && (
-              <Badge variant="outline" className="text-green-600 border-green-600">
+              <Badge variant="outline" className="text-green-600 border-green-600 text-sm">
                 In Stock
               </Badge>
             )}

@@ -1,102 +1,117 @@
-// ----------------- START OF FINAL, CORRECTED AdminLayout.tsx -----------------
+// ----------------- FINAL VERSION: AdminLayout.tsx with New Style -----------------
 
-import { Outlet, Link, useNavigate, NavLink } from 'react-router-dom';
-import { useAuthStore } from '@/store/authStore';
+import { useState } from 'react';
+import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
+import { LayoutDashboard, Package, ShoppingCart, MessageSquare, Users, LogOut, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Package, ShoppingCart, Users, MessageSquare, LogOut, UserCircle } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useAuthStore } from '@/store/authStore';
 
 const navItems = [
-  { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/admin/products', icon: Package, label: 'Products' },
-  { href: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
-  { href: '/admin/users', icon: Users, label: 'Users' },
-  { href: '/admin/inquiries', icon: MessageSquare, label: 'Inquiries' },
+  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Products', href: '/admin/products', icon: Package },
+  { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
+  { name: 'Inquiries', href: '/admin/inquiries', icon: MessageSquare },
+  { name: 'Users', href: '/admin/users', icon: Users },
 ];
 
 export default function AdminLayout() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuthStore();
+  const location = useLocation();
   const navigate = useNavigate();
-  // --- Use a selector to get both the user and the logout function ---
-const user = useAuthStore(state => state.user);
-const logout = useAuthStore(state => state.logout);
-
 
   const handleLogout = () => {
     logout();
-    navigate('/admin/login'); // Redirect to the admin login page
+    navigate('/admin/login');
   };
+
+  const isActive = (href: string) => location.pathname === href;
 
   return (
     <div className="min-h-screen flex bg-gray-100">
+      {/* Mobile Toggle Button */}
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="bg-white"
+        >
+          {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        </Button>
+      </div>
+
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 text-gray-300 flex flex-col">
-        <div className="p-6">
-          <Link to="/admin" className="text-xl font-bold text-primary">
-            SPF Admin
-          </Link>
-        </div>
-        <nav className="mt-4 flex-1">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.label}
-              to={item.href}
-              end // Use 'end' for the Dashboard link to prevent it from matching sub-routes
-              className={({ isActive }) =>
-                `flex items-center px-6 py-3 hover:bg-gray-700 transition-colors ${
-                  isActive ? 'bg-primary/20 text-white border-r-4 border-primary' : ''
-                }`
-              }
+      <div className={`
+        fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 lg:static lg:inset-0
+      `}>
+        <div className="flex flex-col h-full">
+          {/* Logo */}
+          <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
+            <div className="text-2xl font-bold">
+              <span className="text-orange-500">SPF</span>
+              <span className="text-black ml-1">Admin</span>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 px-4 py-6 space-y-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`
+                    flex items-center px-4 py-3 text-lg font-medium rounded-lg transition-colors
+                    ${isActive(item.href)
+                      ? 'bg-orange-100 text-orange-700 border-r-2 border-orange-500'
+                      : 'text-gray-700 hover:bg-gray-100'}
+                  `}
+                >
+                  <Icon className="h-5 w-5 mr-3" />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* User and Logout */}
+          <div className="p-4 border-t border-gray-200">
+            <div className="flex items-center mb-4">
+              <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                {user?.name?.charAt(0).toUpperCase() || 'A'}
+              </div>
+              <div className="ml-3">
+                <p className="text-lg font-medium text-gray-900">{user?.name}</p>
+                <p className="text-sm text-gray-500 capitalize">{user?.role}</p>
+              </div>
+            </div>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="w-full justify-start text-gray-700 hover:text-red-600 hover:border-red-300 text-lg"
             >
-              <item.icon className="h-5 w-5 mr-3" />
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-      </aside>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black bg-opacity-50 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <header className="bg-white shadow-sm border-b">
-          <div className="px-6 py-3">
-            <div className="flex items-center justify-end">
-              <div className="flex items-center space-x-4">
-                {/* --- This is now dynamic --- */}
-                <span className="text-gray-600 text-sm font-medium">
-                  Welcome, {user?.name || 'Admin'}
-                </span>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                     <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                        <Avatar className="h-9 w-9">
-                          <AvatarFallback className="bg-primary/20 text-primary font-semibold">
-                            {user?.name?.charAt(0).toUpperCase() || 'A'}
-                          </AvatarFallback>
-                        </Avatar>
-                      </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                     <DropdownMenuItem asChild>
-                        <Link to="/admin/profile" className="cursor-pointer">
-                            <UserCircle className="mr-2 h-4 w-4" /> Profile
-                        </Link>
-                     </DropdownMenuItem>
-                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-500 focus:text-red-500">
-                        <LogOut className="mr-2 h-4 w-4" /> Logout
-                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Page Content */}
         <main className="flex-1 p-6 overflow-y-auto">
           <Outlet />
         </main>
@@ -104,5 +119,3 @@ const logout = useAuthStore(state => state.logout);
     </div>
   );
 }
-
-// ----------------- END OF FINAL, CORRECTED AdminLayout.tsx -----------------

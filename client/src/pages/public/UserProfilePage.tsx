@@ -16,14 +16,14 @@ import { OrderHistory } from '@/components/profile/OrderHistory';
 import { AccountManagement } from '@/components/profile/AccountManagement'; // Changed from AccountActions to match component
 
 export default function UserProfilePage() {
-  const { user, token, setUser, logout } = useAuthStore();
+  const { user, token, setUser, isLoggedIn } = useAuthStore();
   const [orders, setOrders] = useState<IOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const loadInitialData = async () => {
-      if (!token) {
+      if (!isLoggedIn || !token) {
         toast.error("Please log in to view your profile.");
         navigate('/auth/login');
         return;

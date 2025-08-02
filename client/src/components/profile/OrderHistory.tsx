@@ -65,7 +65,7 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
                     <p className="font-medium">{item.name}</p>
                     <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
                   </div>
-                  <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                  <p className="font-semibold">${(item.price).toFixed(2)}</p>
                 </div>
               ))}
             </div>

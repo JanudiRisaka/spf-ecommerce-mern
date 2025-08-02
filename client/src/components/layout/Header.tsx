@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, LogOut, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import logo from '@/assets/SPF-Logo.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,16 +58,20 @@ export default function Header() {
           </div>
         </div>
       )}
-    <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
+    <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm rounded-b-xl">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center">
-            <Link
-              to="/"
-              className="text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
-            >
-              Shakthi Picture Framing
+          <div className="flex items-center space-x-3">
+            <Link to="/" className="flex items-center space-x-2">
+              <img
+                src={logo}
+                alt="Shakthi Logo"
+                className="h-10 w-auto object-contain"
+              />
+              <span className="text-2xl font-bold text-primary hover:text-primary/80 transition-colors">
+                Shakthi Picture Framing
+              </span>
             </Link>
           </div>
 
@@ -77,7 +82,7 @@ export default function Header() {
                 <NavigationMenuLink asChild>
                   <Link
                     to="/products"
-                    className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                    className="text-zinc-600 group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-xl font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50 "
                   >
                     Products
                   </Link>
@@ -87,7 +92,7 @@ export default function Header() {
                 <NavigationMenuLink asChild>
                   <Link
                     to="/about"
-                    className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                    className="text-zinc-600 group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-xl font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
                   >
                     About Us
                   </Link>
@@ -97,7 +102,7 @@ export default function Header() {
                 <NavigationMenuLink asChild>
                   <Link
                     to="/contact"
-                    className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                    className="text-zinc-600 group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-xl font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
                   >
                     Contact
                   </Link>
@@ -111,24 +116,24 @@ export default function Header() {
             {!isLoggedIn ? (
               // Not logged in - Show Login/Register buttons
               <>
-                <Button variant="outline" asChild>
+                <Button className="text-xl text-zinc-600" variant="outline" asChild>
                   <Link to="/auth/login">Login</Link>
                 </Button>
-                <Button asChild>
+                <Button asChild className="text-xl hover:backdrop-opacity-60 hover:text-white">
                   <Link to="/auth/register">Register</Link>
                 </Button>
               </>
             ) : (
               // Logged in - Show welcome message, cart, and user dropdown
               <>
-                <span className="hidden sm:inline text-sm text-gray-600">
+                <span className="hidden sm:inline text-lg text-gray-600">
                   Welcome, {user?.name}!
                 </span>
 
                 {/* Shopping Cart */}
-                <Button variant="outline" size="icon" asChild className="relative">
+                <Button variant="ghost" size="icon" asChild className="p-3 relative border border-gray-400 hover:bg-gray-100  hover:text-gray-800">
                   <Link to="/cart">
-                    <ShoppingCart className="h-4 w-4" />
+                    <ShoppingCart className="h-5 w-6" />
                     {cartItemCount > 0 && (
                       <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                         {cartItemCount}
@@ -138,15 +143,18 @@ export default function Header() {
                 </Button>
 
                 {/* User Avatar Dropdown */}
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>
+                    <div className='flex items-center gap-2 border rounded-lg border-gray-400'>
+                    <Button variant="ghost" className=" bg-white p-1 hover:bg-gray-100 hover:border-gray-300">
+                      <Avatar className="h-5 w-7 ">
+                        <AvatarFallback className="bg-white text-lg hover:bg-gray-100">
                           {user?.name?.charAt(0).toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
+                    </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <div className="flex items-center justify-start gap-2 p-2">

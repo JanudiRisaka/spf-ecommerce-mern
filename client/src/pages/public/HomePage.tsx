@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import ProductCard from '@/components/public/ProductCard';
 import { Award, Clock, Shield, ArrowRight } from 'lucide-react';
 import { getLatestProducts } from '@/api/productApi';
 import { IProduct } from '@/types';
+import HomePageHeroSection from '@/components/public/HomePageHeroSection';
 
 export default function HomePage() {
 const [latestProducts, setLatestProducts] = useState<IProduct[]>([]);
@@ -15,44 +17,10 @@ const [latestProducts, setLatestProducts] = useState<IProduct[]>([]);
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="">
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
-        {/* Background Image Overlay */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
-          style={{
-            backgroundImage: 'url(https://images.pexels.com/photos/1579708/pexels-photo-1579708.jpeg?auto=compress&cs=tinysrgb&w=1920)'
-          }}
-        />
-
-        {/* Hero Content */}
-        <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in-up">
-            Preserving Your
-            <span className="block text-primary"> Memories in Style</span>
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-gray-300 animate-fade-in-up animation-delay-300">
-            Premium picture framing services with over 20 years of craftsmanship excellence
-          </p>
-          <Button
-            asChild
-            size="lg"
-            className="text-lg px-8 py-6 animate-fade-in-up animation-delay-600 hover:scale-105 transition-transform duration-300"
-          >
-            <Link to="/products">
-              Browse Our Collection
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
-          </div>
-        </div>
+      <section className="">
+        <HomePageHeroSection />
       </section>
 
       {/* Featured Products Section */}
@@ -155,10 +123,10 @@ const [latestProducts, setLatestProducts] = useState<IProduct[]>([]);
             Visit our showroom or browse our collection online to get started
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-400">
-            <Button variant="secondary" size="lg" asChild>
+            <Button variant="secondary" size="lg" asChild className="text-gray-800 border-white hover:bg-white hover:text-primary">
               <Link to="/products">Shop Now</Link>
             </Button>
-            <Button variant="outline" size="lg" asChild className="border-white text-white hover:bg-white hover:text-primary">
+            <Button variant="outline" size="lg" asChild className="text-gray-800 border-white hover:bg-white hover:text-primary">
               <Link to="/contact">Contact Us</Link>
             </Button>
           </div>

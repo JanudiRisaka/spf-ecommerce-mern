@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import logo from '@/assets/SPF-Logo.png';
 
 export default function Footer() {
   return (
@@ -8,19 +9,19 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-primary">
-              Shakthi Picture Framing
-            </h3>
+            <div className="flex items-center space-x-3 text-xl font-bold text-primary">
+            <img
+              src={logo}
+              alt="Shakthi Logo"
+              className="h-10 w-auto object-contain"
+            />
+            <span>Shakthi Picture Framing</span>
+          </div>
             <p className="text-gray-300 leading-relaxed">
-              Premium picture framing services with over 20 years of experience. 
-              We specialize in custom frames, art preservation, and professional 
+              Premium picture framing services with over 20 years of experience.
+              We specialize in custom frames, art preservation, and professional
               mounting solutions.
             </p>
-            <div className="flex space-x-4">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">S</span>
-              </div>
-            </div>
           </div>
 
           {/* Quick Links */}
@@ -28,40 +29,40 @@ export default function Footer() {
             <h3 className="text-lg font-semibold">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link 
-                  to="/" 
+                <Link
+                  to="/"
                   className="text-gray-300 hover:text-primary transition-colors"
                 >
                   Home
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/products" 
+                <Link
+                  to="/products"
                   className="text-gray-300 hover:text-primary transition-colors"
                 >
                   Products
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/about" 
+                <Link
+                  to="/about"
                   className="text-gray-300 hover:text-primary transition-colors"
                 >
                   About Us
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/contact" 
+                <Link
+                  to="/contact"
                   className="text-gray-300 hover:text-primary transition-colors"
                 >
                   Contact
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/services" 
+                <Link
+                  to="/services"
                   className="text-gray-300 hover:text-primary transition-colors"
                 >
                   Services
@@ -77,17 +78,17 @@ export default function Footer() {
               <div className="flex items-center space-x-3">
                 <MapPin className="h-5 w-5 text-primary flex-shrink-0" />
                 <span className="text-gray-300">
-                  123 Art Street, Creative District<br />
-                  Chennai, Tamil Nadu 600001
+                  33A 5th Ln, Colombo 00300,<br />
+                  Sri Lanka.
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-primary flex-shrink-0" />
-                <span className="text-gray-300">+91 98765 43210</span>
+                <span className="text-gray-300">+94 7593 62837</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-primary flex-shrink-0" />
-                <span className="text-gray-300">info@shakthiframing.com</span>
+                <span className="text-gray-300">shakthiframing@gmail.com</span>
               </div>
             </div>
             <div className="pt-4">
@@ -103,7 +104,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
           <p className="text-gray-400 text-sm">
-            &copy; {new Date().getFullYear()} Shakthi Picture Framing. All rights reserved. 
+            &copy; {new Date().getFullYear()} Shakthi Picture Framing. All rights reserved.
             Crafted with care for your precious memories.
           </p>
         </div>

@@ -34,7 +34,6 @@ export interface UpdateUserData {
   // Add other fields you want to allow updating
 }
 
-// Type for the "Change Password" form data
 export interface PasswordChangeData {
   currentPassword: string;
   newPassword: string;

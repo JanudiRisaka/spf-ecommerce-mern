@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+//import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -9,7 +9,6 @@ import { IProduct } from '@/types';
 import { getProducts } from '@/api/productApi';
 import { Filter } from 'lucide-react';
 import { LoadingPage } from '@/components/shared/LoadingPage';
-
 
 export default function ProductsPage() {
   // --- STATE MANAGEMENT FOR REAL DATA ---
@@ -92,33 +91,32 @@ export default function ProductsPage() {
           <Card className="sticky top-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5" />
-                Filters
+                <Filter className="h-5 w-5 text-xl" />
+                <Label className="text-xl font-semibold mb-3 block">
+                  Filter
+              </Label>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Category Filter */}
-              <div>
-                <Label className="text-base font-semibold mb-3 block">Category</Label>
-                <div className="space-y-3">
-                  {availableCategories.map((category) => (
-                    <div key={category} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={category}
-                        checked={selectedCategories.includes(category)}
-                        onCheckedChange={(checked) =>
-                          handleCategoryChange(category, checked as boolean)
-                        }
-                      />
-                      <Label
-                        htmlFor={category}
-                        className="text-sm font-normal cursor-pointer"
-                      >
-                        {category}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
+              <Label className="text-base font-semibold mb-3 block">
+                  Category
+              </Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {availableCategories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() =>
+                      handleCategoryChange(category, !selectedCategories.includes(category))
+                    }
+                    className={`px-3 py-1 rounded-full border-white text-sm ${
+                      selectedCategories.includes(category)
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 '
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
               </div>
 
               <Separator />
@@ -153,7 +151,7 @@ export default function ProductsPage() {
                       setSelectedCategories([]);
                       setPriceRange([minPrice, maxPrice]);
                     }}
-                    className="text-sm text-primary hover:text-primary/80 font-medium"
+                    className="text-base text-amber-50 hover:text-primary/80 font-medium"
                   >
                     Clear all filters
                   </button>

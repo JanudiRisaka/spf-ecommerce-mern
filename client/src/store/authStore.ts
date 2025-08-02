@@ -3,18 +3,19 @@ import { persist } from 'zustand/middleware';
 import type { AuthState, User } from '@/types';
 import { registerUser as registerApi, loginUser as loginApi } from '@/api/authApi';
 import { useCartStore } from './cartStore';
+
 export const useAuthStore = create<AuthState & {
   _hasHydrated: boolean;
   setHasHydrated: () => void;
-}>()(
-  persist(
-    (set, get) => ({
-      // --- INITIAL STATE ---
-      isLoggedIn: false,
-      user: null,
-      token: null,
-      _hasHydrated: false, // ✅ hydration tracking
-      setHasHydrated: () => set({ _hasHydrated: true }),
+    }>()(
+      persist(
+        (set, get) => ({
+          // --- INITIAL STATE ---
+          isLoggedIn: false,
+          user: null,
+          token: null,
+          _hasHydrated: false, // ✅ hydration tracking
+          setHasHydrated: () => set({ _hasHydrated: true }),
 
       // --- LOGIN FUNCTION ---
       login: async (email: string, password: string) => {

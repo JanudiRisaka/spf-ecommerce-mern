@@ -112,19 +112,32 @@ useEffect(() => {
   if (isLoading) return <LoadingPage />;
 
   return (
-    <div className="space-y-8 Px-4 py-8 max-w-6xl mx-auto ">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <div className="px-4">
+      <div className="pr-5 pl-5 mb-4">
+        <div className="flex items-center justify-between pt-6">
 
+          {/* Child 1: The text block (will be pushed to the left) */}
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">{isEditing ? 'Edit Product' : 'Add New Product'}</h1>
-            <p className="text-lg text-gray-600">{isEditing ? `Editing product: ${form.getValues('name')}` : 'Create a new product for your catalog'}</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              {isEditing ? 'Edit Product' : 'Add New Product'}
+            </h1>
+            <p className="text-lg text-gray-600">
+              {isEditing ? `Editing product: ${form.getValues('name')}` : 'Create a new product for your catalog'}
+            </p>
           </div>
-          <Button variant="outline" asChild className=''><Link to="/admin/products"><ArrowLeft className="h-4 w-4 mr-2" /> Back to Products</Link></Button>
+
+          {/* Child 2: The button (will be pushed to the right) */}
+          {/* Note: The `ml-auto` is no longer needed because `justify-between` handles the alignment */}
+          <Button variant="outline" asChild className="text-xl py-6">
+            <Link to="/admin/products">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Products
+            </Link>
+          </Button>
         </div>
       </div>
 
-      <div className="max-w-4xl">
+      {/* <div className="max-w-4xl mx-auto "> */}
         <Card>
           <CardHeader><CardTitle className="text-2xl">Product Information</CardTitle></CardHeader>
           <CardContent>
@@ -254,6 +267,6 @@ useEffect(() => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    // </div>
   );
 }

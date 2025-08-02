@@ -140,7 +140,7 @@ export default function AdminProductsPage() {
                     <img
                       src={product.images[0] || '/placeholder.jpg'} // Use first image or placeholder
                       alt={product.name}
-                      className="w-12 h-12 object-cover rounded-md"
+                      className="w-20 h-20 object-cover rounded-md"
                     />
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>

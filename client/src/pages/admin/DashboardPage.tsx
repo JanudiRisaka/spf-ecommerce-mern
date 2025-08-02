@@ -34,6 +34,7 @@ export default function DashboardPage() {
     };
     fetchStats();
   }, [token]);
+  
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {

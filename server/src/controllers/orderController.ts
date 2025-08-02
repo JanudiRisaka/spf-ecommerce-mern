@@ -159,3 +159,37 @@ export const getMyOrders = async (req: Request, res: Response): Promise<Response
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
+/**
+ * @desc    Get sales data for chart
+ * @route   GET /api/v1/orders/sales-stats
+ * @access  Private/Admin
+ */
+export const getSalesStats = async (req: Request, res: Response): Promise<Response | void> => {
+  try {
+    const stats = await Order.aggregate([
+      {
+        $match: { isPaid: true } // only count paid orders
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$paidAt" } }, // group by day
+          totalSales: { $sum: "$totalPrice" }
+        }
+      },
+      {
+        $sort: { _id: 1 } // sort by date
+      }
+    ]);
+
+    const formatted = stats.map((entry) => ({
+      date: entry._id,
+      sales: entry.totalSales
+    }));
+
+    res.status(200).json({ success: true, data: formatted });
+  } catch (error) {
+    console.error("Sales stats error:", error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};

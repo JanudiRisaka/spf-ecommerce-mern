@@ -4,6 +4,7 @@
   "main": "index.js",
   "private": true,
   "type": "commonjs",
+  "engines": { "node": "18.x" },
   "scripts": {
     "dev": "nodemon --watch src --exec ts-node src/local.ts",
     "build": "tsc",
@@ -44,6 +45,5 @@
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
-  },
-  "engines": { "node": "20.x" }
+  }
 }

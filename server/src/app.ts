@@ -1,9 +1,8 @@
-import express from 'express';
+import express, { Router } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
-
-import './env';               // loads dotenv once
+import './env';
 import connectDB from './config/db';
 
 import authRoutes from './routes/authRoutes';
@@ -29,6 +28,7 @@ app.get('/api/db-status', (_req, res) => {
   res.json({ state: states[rs] ?? 'unknown' });
 });
 
+// ✅ Make /api/v1 instant and outside the DB gate
 app.get('/api/v1', (_req, res) => {
   res.json({ message: 'Shakthi Picture Framing API is running!' });
 });
@@ -37,14 +37,14 @@ app.get('/api/v1', (_req, res) => {
 app.use(express.json());
 const allowed = [
   'http://localhost:5173',
-  process.env.CLIENT_URL!, // your prod client
+  process.env.CLIENT_URL!, // your prod client URL, e.g. https://spf-client.vercel.app
 ];
 app.use(cors({
   origin: (origin, cb) => {
     if (!origin) return cb(null, true);
     const ok =
       allowed.includes(origin) ||
-      /^https:\/\/your-client-project-.*\.vercel\.app$/.test(origin);
+      /^https:\/\/<YOUR-CLIENT-PROJECT>-.*\.vercel\.app$/.test(origin); // ← replace
     cb(ok ? null : new Error('Not allowed by CORS'), ok);
   },
   credentials: true,
@@ -57,32 +57,40 @@ app.use(helmet({
       "connect-src": ["'self'", "https://api.stripe.com", "https://r.stripe.com"],
       "frame-src": ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
       "img-src": ["'self'", "https:", "data:"],
-      // if you use Google Fonts on the client:
       "style-src": ["'self'", "https://fonts.googleapis.com", "'unsafe-inline'"],
       "font-src": ["'self'", "https://fonts.gstatic.com", "data:"]
     }
   }
 }));
 
-// DB gate (don’t await at top level)
-const dbReady = connectDB();
-app.use(async (_req, _res, next) => {
-  try { await dbReady; next(); }
-  catch (e) { next(e); }
+// Lazy DB only for /api/v1/*
+const api = Router();
+let dbReady: Promise<any> | null = null;
+api.use(async (_req, _res, next) => {
+  try {
+    if (!dbReady) dbReady = connectDB();
+    await dbReady;
+    next();
+  } catch (e) {
+    next(e);
+  }
 });
 
-// routes that need DB
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/products', productRoutes);
-app.use('/api/v1/orders', orderRoutes);
-app.use('/api/v1/inquiries', inquiryRoutes);
-app.use('/api/v1/upload', uploadRoutes);
-app.use('/api/v1/payment', paymentRoutes);
-app.use('/api/v1/dashboard', dashboardRoutes);
-app.use('/api/v1/chatbot', chatbotRoutes);
+// DB-backed routes
+api.use('/auth', authRoutes);
+api.use('/users', userRoutes);
+api.use('/products', productRoutes);
+api.use('/orders', orderRoutes);
+api.use('/inquiries', inquiryRoutes);
+api.use('/upload', uploadRoutes);
+api.use('/payment', paymentRoutes);
+api.use('/dashboard', dashboardRoutes);
+api.use('/chatbot', chatbotRoutes);
 
-// always respond on errors (no 300s timeouts)
+// Mount router after the instant /api/v1 handler
+app.use('/api/v1', api);
+
+// Error handler
 app.use((err: any, _req: any, res: any, _next: any) => {
   console.error('API error:', err?.message || err);
   res.status(500).json({ error: 'Internal Server Error', detail: String(err?.message || err) });

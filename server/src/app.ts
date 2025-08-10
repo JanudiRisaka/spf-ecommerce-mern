@@ -29,10 +29,26 @@ app.get('/api/db-status', (_req, res) => {
   res.json({ state: states[rs] ?? 'unknown' });
 });
 
+app.get('/api/v1', (_req, res) => {
+  res.json({ message: 'Shakthi Picture Framing API is running!' });
+});
+
 // middleware (once each)
 app.use(express.json());
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-app.use(cors({ origin: clientUrl, credentials: true }));
+const allowed = [
+  'http://localhost:5173',
+  process.env.CLIENT_URL!, // your prod client
+];
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    const ok =
+      allowed.includes(origin) ||
+      /^https:\/\/your-client-project-.*\.vercel\.app$/.test(origin);
+    cb(ok ? null : new Error('Not allowed by CORS'), ok);
+  },
+  credentials: true,
+}));
 app.use(helmet({
   contentSecurityPolicy: {
     useDefaults: true,
@@ -65,10 +81,6 @@ app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/payment', paymentRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/chatbot', chatbotRoutes);
-
-app.get('/api/v1', (_req, res) => {
-  res.json({ message: 'Shakthi Picture Framing API is running!' });
-});
 
 // always respond on errors (no 300s timeouts)
 app.use((err: any, _req: any, res: any, _next: any) => {

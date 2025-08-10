@@ -22,6 +22,7 @@ const app = express();
 
 app.get('/', (_req, res) => res.status(200).send('API alive'));
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
+app.get('/api/ping', (_req, res) => res.status(200).send('pong'));
 
 // Kick off the (cached) DB connect once; don't await at top-level
 const dbReady = connectDB();

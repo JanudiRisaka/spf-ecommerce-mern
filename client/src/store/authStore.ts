@@ -9,7 +9,7 @@ export const useAuthStore = create<AuthState & {
   setHasHydrated: () => void;
     }>()(
       persist(
-        (set, get) => ({
+        (set) => ({
           // --- INITIAL STATE ---
           isLoggedIn: false,
           user: null,

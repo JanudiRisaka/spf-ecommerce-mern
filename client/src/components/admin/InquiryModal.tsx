@@ -6,7 +6,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Mail, Phone, Calendar } from 'lucide-react';
+import { Mail, Calendar } from 'lucide-react';
 
 interface Inquiry {
   id: string;

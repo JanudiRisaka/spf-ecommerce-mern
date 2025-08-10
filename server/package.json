@@ -2,11 +2,12 @@
   "name": "server",
   "version": "1.0.0",
   "main": "index.js",
+  "private": true,
+  "type": "commonjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/index.ts",
+    "dev": "nodemon --watch src --exec ts-node src/local.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/local.js",
     "type-check": "tsc --noEmit"
   },
   "keywords": [],
@@ -28,6 +29,7 @@
     "multer": "^2.0.1",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.5",
+    "serverless-http": "^3.2.0",
     "stripe": "^18.3.0"
   },
   "devDependencies": {
@@ -38,6 +40,7 @@
     "@types/multer": "^2.0.0",
     "@types/node": "^24.0.13",
     "@types/nodemailer": "^6.4.17",
+    "@vercel/node": "^5.3.11",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"

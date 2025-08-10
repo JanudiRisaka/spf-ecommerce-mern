@@ -1,3 +1,4 @@
+// client/src/store/authStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { AuthState, User } from '@/types';

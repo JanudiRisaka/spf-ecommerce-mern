@@ -1,3 +1,4 @@
+// client/src/routes/index.tsx
 import { BrowserRouter, useRoutes } from 'react-router-dom';
 
 // Import the route arrays

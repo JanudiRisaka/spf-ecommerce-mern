@@ -1,6 +1,8 @@
-// server/src/index.ts
 import express from 'express';
 import dotenv from 'dotenv';
+
+dotenv.config();
+
 import connectDB from './config/db';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -17,14 +19,18 @@ import paymentRoutes from './routes/paymentRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import chatbotRoutes from './routes/chatbotRoutes';
 
-// Load environment variables
+// Load environment variables from .env file
 dotenv.config();
 
+// Connect to database
+connectDB();
+
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    // Connect to the database
+    // Connect to the database FIRST
     await connectDB();
     console.log("Successfully connected to MongoDB.");
 
@@ -41,10 +47,6 @@ const startServer = async () => {
     app.use(express.json());
 
     // --- Routes ---
-    app.get('/api/health', (req, res) => {
-      console.log("Health check endpoint was hit!");
-      res.status(200).json({ status: 'ok', message: 'Server is up and running.' });
-    });
     app.use('/api/v1/auth', authRoutes);
     app.use('/api/v1/users', userRoutes);
     app.use('/api/v1/products', productRoutes);
@@ -54,31 +56,39 @@ const startServer = async () => {
     app.use('/api/v1/payment', paymentRoutes);
     app.use('/api/v1/dashboard', dashboardRoutes);
     app.use('/api/v1/chatbot', chatbotRoutes);
-    app.get('/api/v1', (req, res) => {
-      res.json({ message: 'Shakthi Picture Framing API is running!' });
+
+    // --- Health Check for Vercel ---
+    app.get('/api/health', (req, res) => {
+      res.status(200).json({ status: 'ok', message: 'Server is healthy.' });
     });
 
   } catch (error) {
-    console.error("Failed to start the server:", error);
-    // Even if DB fails, define a route to report the error
-     app.get('/api/health', (req, res) => {
+    console.error("Failed to connect to DB, server setup aborted:", error);
+    // If DB fails, provide a specific error response
+    app.get('/api/health', (req, res) => {
         let errorMessage = "An unknown error occurred during server startup.";
-        // Check if the error is an actual Error object
         if (error instanceof Error) {
-            // If it is, we can safely access its message property
             errorMessage = error.message;
         }
         res.status(500).json({
             status: 'error',
-            message: 'Server failed to start, likely a database connection issue.',
+            message: 'Server failed to start due to a database connection issue.',
             error: errorMessage
         });
     });
   }
 };
 
-// Start the server initialization
+// --- This part is for LOCAL development ONLY ---
+// Vercel will ignore this app.listen() block because it imports the `app` object directly.
+if (process.env.NODE_ENV === 'development') {
+    app.listen(PORT, () => {
+        console.log(`Server is listening for local development on port ${PORT}`);
+    });
+}
+
+// Initialize the server setup
 startServer();
 
-// This export is what Vercel uses
+// --- This export is CRITICAL for Vercel ---
 export default app;

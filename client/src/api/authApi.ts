@@ -1,3 +1,4 @@
+// client/src/api/authApi.ts
 import axios from 'axios';
 import { User } from '@/types';
 

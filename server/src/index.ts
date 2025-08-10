@@ -1,8 +1,6 @@
+// server/src/index.ts
 import express from 'express';
 import dotenv from 'dotenv';
-
-dotenv.config();
-
 import connectDB from './config/db';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -19,57 +17,68 @@ import paymentRoutes from './routes/paymentRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import chatbotRoutes from './routes/chatbotRoutes';
 
-// Load environment variables from .env file
+// Load environment variables
 dotenv.config();
 
-// Connect to database
-connectDB();
-
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-// Security middleware
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      "script-src": ["'self'", "https://js.stripe.com"], // Allow scripts from your site and Stripe
-      "connect-src": ["'self'", "https://api.stripe.com", "https://r.stripe.com"], // Allow connections to your API and Stripe's services
-      "frame-src": ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"], // Allow iframes from Stripe
-      "img-src": ["'self'", "https://*.stripe.com"], // Allow images from Stripe
-    },
-  })
-);
+const startServer = async () => {
+  try {
+    // Connect to the database
+    await connectDB();
+    console.log("Successfully connected to MongoDB.");
 
-// Enable CORS for all origins (you might want to restrict this in production)
+    // --- Middleware ---
+    app.use(helmet.contentSecurityPolicy({ /* ... your helmet config ... */ }));
+    const clientUrl = process.env.CLIENT_URL;
+    if (!clientUrl) {
+      console.error("CRITICAL: CLIENT_URL environment variable is not set.");
+    }
+    app.use(cors({
+      origin: clientUrl,
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    }));
+    app.use(express.json());
 
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    // --- Routes ---
+    app.get('/api/health', (req, res) => {
+      console.log("Health check endpoint was hit!");
+      res.status(200).json({ status: 'ok', message: 'Server is up and running.' });
+    });
+    app.use('/api/v1/auth', authRoutes);
+    app.use('/api/v1/users', userRoutes);
+    app.use('/api/v1/products', productRoutes);
+    app.use('/api/v1/orders', orderRoutes);
+    app.use('/api/v1/inquiries', inquiryRoutes);
+    app.use('/api/v1/upload', uploadRoutes);
+    app.use('/api/v1/payment', paymentRoutes);
+    app.use('/api/v1/dashboard', dashboardRoutes);
+    app.use('/api/v1/chatbot', chatbotRoutes);
+    app.get('/api/v1', (req, res) => {
+      res.json({ message: 'Shakthi Picture Framing API is running!' });
+    });
 
-app.use(cors({
-  origin: clientUrl,  // Allow only your client to make requests
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-}));
+  } catch (error) {
+    console.error("Failed to start the server:", error);
+    // Even if DB fails, define a route to report the error
+     app.get('/api/health', (req, res) => {
+        let errorMessage = "An unknown error occurred during server startup.";
+        // Check if the error is an actual Error object
+        if (error instanceof Error) {
+            // If it is, we can safely access its message property
+            errorMessage = error.message;
+        }
+        res.status(500).json({
+            status: 'error',
+            message: 'Server failed to start, likely a database connection issue.',
+            error: errorMessage
+        });
+    });
+  }
+};
 
-// Parse JSON request bodies
-app.use(express.json());
+// Start the server initialization
+startServer();
 
-// Routes
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/products', productRoutes);
-app.use('/api/v1/orders', orderRoutes);
-app.use('/api/v1/inquiries', inquiryRoutes);
-app.use('/api/v1/upload', uploadRoutes);
-app.use('/api/v1/payment', paymentRoutes);
-app.use('/api/v1/dashboard', dashboardRoutes);
-app.use('/api/v1/chatbot', chatbotRoutes);
-
-// Simple GET route
-app.get('/api/v1', (req, res) => {
-  res.json({ message: 'Shakthi Picture Framing API is running!' });
-});
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// This export is what Vercel uses
+export default app;

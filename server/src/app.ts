@@ -20,12 +20,20 @@ dotenv.config();
 
 const app = express();
 
+app.get('/', (_req, res) => res.status(200).send('API alive'));
+app.get('/favicon.ico', (_req, res) => res.status(204).end());
+
 // Kick off the (cached) DB connect once; don't await at top-level
 const dbReady = connectDB();
 
 app.use(async (_req, _res, next) => {
-  await dbReady;
-  next();
+  try {
+    await dbReady;
+    return next();
+  } catch (e) {
+    // reply fast instead of hanging 300s
+    return next(e);
+  }
 });
 
 // Security headers (you can also do app.use(helmet()) above this if you want the full set)

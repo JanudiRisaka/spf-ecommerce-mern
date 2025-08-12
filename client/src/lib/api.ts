@@ -1,8 +1,5 @@
-// client/src/lib/api.ts
 export const API_BASE =
-  import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:5000';
 
-export async function getHealth() {
-  const res = await fetch(`${API_BASE}/api/v1`);
-  return res.json();
-}
+export const apiUrl = (path: string) =>
+  `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;

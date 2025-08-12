@@ -10,6 +10,8 @@ import UserProfilePage from '@/pages/public/UserProfilePage';
 import ShippingPage from '@/pages/public/ShippingPage';
 import PaymentPage from '@/pages/public/PaymentPage';
 import OrderCompletePage from '@/pages/public/OrderCompletePage';
+import PrivacyPolicyPage from '@/pages/legal/PrivacyPolicyPage';
+import TermsPage from '@/pages/legal/TermsPage';
 
 // THIS IS THE ONLY THING THAT SHOULD BE IN THIS FILE
 export const publicRoutes: RouteObject[] = [
@@ -21,6 +23,10 @@ export const publicRoutes: RouteObject[] = [
       { path: 'products', element: <ProductsPage /> },
       { path: 'products/:id', element: <ProductDetailPage /> },
       { path: 'about', element: <AboutUsPage /> },
+
+      { path: 'privacy-policy', element: <PrivacyPolicyPage /> },
+      { path: 'terms', element: <TermsPage /> },
+
       { path: 'contact', element: <ContactPage /> },
       { path: 'cart', element: <CartPage /> },
       { path: 'profile', element: <UserProfilePage /> },

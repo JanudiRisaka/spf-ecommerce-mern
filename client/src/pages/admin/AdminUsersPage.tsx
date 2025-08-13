@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Search, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'; // Changed icons
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react'; // Changed icons
 import { toast } from 'sonner';
 
 import { User } from '@/types'; // Use the correct User type
@@ -157,7 +157,7 @@ export default function AdminUsersPage() {
                   <TableCell>{getRoleBadge(user.role)}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(user._id)}>
-                      <Trash2 className="h-4 w-4 mr-1" /> Delete
+                       Deactivate
                     </Button>
                   </TableCell>
                 </TableRow>

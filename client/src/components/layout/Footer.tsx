@@ -62,10 +62,18 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  to="/services"
+                  to="/privacy-policy"
                   className="text-gray-300 hover:text-primary transition-colors"
                 >
-                  Services
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/terms"
+                  className="text-gray-300 hover:text-primary transition-colors"
+                >
+                  Terms of Conditions
                 </Link>
               </li>
             </ul>

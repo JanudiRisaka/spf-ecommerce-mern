@@ -13,6 +13,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -20,35 +21,41 @@ export default function RegisterPage() {
   const { register } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
 
-    // Basic validation
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
+  // Terms & Conditions validation
+  if (!termsAccepted) {
+    setError('You must agree to the Terms and Conditions before registering.');
+    setIsLoading(false);
+    return;
+  }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      setIsLoading(false);
-      return;
-    }
+  // Password validation
+  if (password !== confirmPassword) {
+    setError('Passwords do not match');
+    setIsLoading(false);
+    return;
+  }
 
-    try {
-      await register(email, password, name);
-      toast.success("Account created successfully!"); // Use toast for success
-      navigate('/'); // Redirect to home page after successful registration
-    } catch (err: any) { // <-- Change to `any` to access err.message
-      // Set the error state with the message from the API
-      setError(err.message || 'Registration failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  if (password.length < 6) {
+    setError('Password must be at least 6 characters long');
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    await register(email, password, name);
+    toast.success("Account created successfully!");
+    navigate('/');
+  } catch (err: any) {
+    setError(err.message || 'Registration failed. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -118,6 +125,29 @@ export default function RegisterPage() {
                 minLength={6}
               />
             </div>
+
+             {/* Privacy & Terms Checkbox */}
+            <div className="flex items-start space-x-2">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                disabled={isLoading}
+                className="mt-1"
+              />
+              <Label htmlFor="terms" className="text-sm">
+                I agree to the{' '}
+                <Link to="/privacy-policy" className="text-primary hover:underline">
+                  Privacy Policy
+                </Link>{' '}
+                and{' '}
+                <Link to="/terms" className="text-primary hover:underline">
+                  Terms of Conditions
+                </Link>.
+              </Label>
+            </div>
+
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button
